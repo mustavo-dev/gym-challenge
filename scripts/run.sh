@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+if [ ! -d ".venv" ]; then
+  python3 -m venv .venv
+fi
+
+# shellcheck disable=SC1091
+source .venv/bin/activate
+
+python3 -m pip install --upgrade pip >/dev/null
+python3 src/main.py
