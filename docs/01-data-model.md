@@ -39,7 +39,7 @@ Links Participant ↔ Cycle
 - participant_id
 - score_day (YYYY-MM-DD label)
 - new_points
-- reason (optional)
+- reason
 - created_at
 - admin (e.g., Jayme)
 
