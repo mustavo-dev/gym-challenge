@@ -3,56 +3,67 @@
 ## Entities
 
 ### Participant
-- participant_id (internal stable ID)
-- first_name
-- last_name
-- created_at
-- active (global directory)
+
+* participant\_id (internal stable ID)
+* first\_name
+* last\_name
+* created\_at
+* active (global directory)
 
 ### Cycle
-- cycle_id (string, unique)
-- name
-- timezone (Europe/Berlin)
-- start_dt
-- end_dt
-- status: planned|active|closed
+
+* cycle\_id (string, unique)
+* name
+* timezone (Europe/Berlin)
+* start\_dt
+* end\_dt
+* status: planned|active|closed
+* Cycle includes score days up to end\_score\_day; last window closes at 12:00 following day
 
 ### Membership
+
 Links Participant ↔ Cycle
-- cycle_id
-- participant_id
-- active_in_cycle
-- joined_at
-- left_at (optional)
+
+* cycle\_id
+* participant\_id
+* active\_in\_cycle
+* joined\_at
+* left\_at (optional)
 
 ### Submission (raw event)
-- submission_id
-- cycle_id
-- participant_id
-- submitted_at (tz-aware)
-- points (-3..5)
-- source (manual|import|future:google)
+
+* submission\_id
+* cycle\_id
+* participant\_id
+* submitted\_at (tz-aware)
+* points (-3..5)
+* source (manual|import|future:google)
 
 ### Correction (admin overlay)
-- correction_id
-- cycle_id
-- participant_id
-- score_day (YYYY-MM-DD label)
-- new_points
-- reason
-- created_at
-- admin (e.g., Jayme)
+
+* correction\_id
+* cycle\_id
+* participant\_id
+* score\_day (YYYY-MM-DD label)
+* new\_points
+* reason required
+* created\_at
+* admin (e.g., Jayme)
 
 ## Derived Concepts
 
 ### Score Day
-A "score day" is determined from submitted_at using the 20:00 boundary.
-- If submitted_at time is 20:00–23:59 → score_day = that date
-- If submitted_at time is 00:00–11:59 → score_day = previous date
-- If submitted_at time is 12:00–19:59 → invalid submission
+
+A "score day" is determined from submitted\_at using the 20:00 boundary.
+
+* If submitted\_at time is 20:00–23:59 → score\_day = that date
+* If submitted\_at time is 00:00–11:59 → score\_day = previous date
+* If submitted\_at time is 12:00–19:59 → invalid submission
 
 ### Final Daily Score
-For each (participant, score_day) in a given cycle:
-1) Take earliest valid submission (if any)
-2) If no valid submission → missing penalty (-3)
-3) If an admin correction exists for that (participant, score_day) → override to correction points
+
+For each (participant, score\_day) in a given cycle:
+
+1. Take earliest valid submission (if any)
+2. If no valid submission → missing penalty (-3)
+3. If an admin correction exists for that (participant, score\_day) → override to correction points
