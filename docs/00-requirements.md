@@ -39,6 +39,8 @@ Must support 3-month cycles, cycle restarts, and concurrent cycles.
 
 * Console leaderboard summary
 * CSV export
+* Display format: Last, First
+* Internals store first + last separately
 
 ## Persistence (v1)
 
