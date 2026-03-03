@@ -42,6 +42,15 @@ Must support 3-month cycles, cycle restarts, and concurrent cycles.
 * Display format: Last, First
 * Internals store first + last separately
 
+## Reporting Policies
+
+* Inactive handling models: historical vs exclue
+
+## Auto-inactive rule
+
+* 4 Consecutive missed score days → auto-inactive in that cycle
+* Admin correction does not count unless active mode enabled
+
 ## Persistence (v1)
 
 * JSON files stored locally in data/ (gitignored)

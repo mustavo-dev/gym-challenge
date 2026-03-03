@@ -29,6 +29,9 @@ Links Participant ↔ Cycle
 * active\_in\_cycle
 * joined\_at
 * left\_at (optional)
+* auto_inactive: bool
+* inactive_reason: "manual"|"auto"
+* inactive_effective_score_day: date | None
 
 ### Submission (raw event)
 
