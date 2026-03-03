@@ -44,7 +44,7 @@ def compute_daily_scores(
     score_days = _date_range(cycle_start, cycle_end)
 
     # 2) Initialize result grid: everyone starts with missing_points each day
-    result: Dict[str, Dict[date, int]] = {}
+    result: Dict[str, Dict[date, DailyScore]] = {}
     for pid in participant_ids:
         result[pid] = {}
         for d in score_days:
@@ -81,3 +81,37 @@ def compute_daily_scores(
         seen.add(key)
 
     return result
+
+def detect_auto_inactive(
+    daily: Dict[str, Dict[date, DailyScore]],
+    cycle_start: date,
+    cycle_end: date,
+    streak_required: int = 4,
+) -> Dict[str, date]:
+    """
+    Return mapping of participant_id -> inactive_effective_score_day.
+    A participant becomes inactive after `streak_required` consecutive days with participated=False.
+    Inactivity becomes effective the next score day (the day after the streak completes).
+    """
+    updates: Dict[str, date] = {}
+
+    score_days = _date_range(cycle_start, cycle_end)
+
+    for pid, per_day in daily.items():
+        streak = 0
+
+        for d in score_days:
+            # If the day is missing from the dict, treat as not participated
+            day_score = per_day.get(d, DailyScore(points=0, participated=False))
+
+            if day_score.participated:
+                streak = 0
+                continue
+
+            streak += 1
+
+            if streak >= streak_required:
+                updates[pid] = d + timedelta(days=1)
+                break  # stop scanning this participant after first trigger
+
+    return updates
