@@ -46,7 +46,13 @@ def compute_daily_scores(
             result[pid][d] = missing_points
 
     # 3) Overlay valid submissions onto the grid
-    for sub in submissions:
+    # Sort submissions by submitted_at ascending so earliest appear first.
+    submissions_sorted = sorted(submissions, key=lambda s: s.submitted_at)
+
+    # Track which (participant_id, score_day) pairs we've already applied from submissions.
+    seen: set[tuple[str, date]] = set()
+
+    for sub in submissions_sorted:
         # ignore submissions for participants we aren't scoring
         if sub.participant_id not in result:
             continue
@@ -60,7 +66,13 @@ def compute_daily_scores(
         if not score_day_in_cycle(sd, cycle_start, cycle_end):
             continue
 
-        # set the score for that day
+        key = (sub.participant_id, sd)
+        if key in seen:
+            # we've already applied an earlier submission for this participant+day
+            continue
+
+        # apply the earliest submission for this participant+score_day
         result[sub.participant_id][sd] = sub.points
+        seen.add(key)
 
     return result

@@ -57,6 +57,40 @@ class TestScoringEngine(unittest.TestCase):
 
         self.assertEqual(result["p1"][date(2026, 3, 1)], 5)
 
+    def test_duplicate_submissions_keep_earliest_valid(self):
+        cycle_start = date(2026, 3, 1)
+        cycle_end = date(2026, 3, 1)
+
+        submissions = [
+            Submission(
+                submission_id="s_early",
+                cycle_id="c1",
+                participant_id="p1",
+                submitted_at=datetime.fromisoformat("2026-03-01T20:01:00+01:00"),
+                points=2,
+                source="manual",
+            ),
+            Submission(
+                submission_id="s_late",
+                cycle_id="c1",
+                participant_id="p1",
+                submitted_at=datetime.fromisoformat("2026-03-01T20:05:00+01:00"),
+                points=5,
+                source="manual",
+            ),
+        ]
+
+        result = compute_daily_scores(
+            participant_ids=["p1"],
+            submissions=submissions,
+            tz=BERLIN,
+            cycle_start=cycle_start,
+            cycle_end=cycle_end,
+            missing_points=-3,
+        )
+
+        # Earliest wins => 2
+        self.assertEqual(result["p1"][date(2026, 3, 1)], 2)
 
 if __name__ == "__main__":
     unittest.main()
