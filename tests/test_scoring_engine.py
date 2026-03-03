@@ -27,9 +27,14 @@ class TestScoringEngine(unittest.TestCase):
         )
 
         # 3 score days, each should be -3
-        self.assertEqual(result["p1"][date(2026, 3, 1)], -3)
-        self.assertEqual(result["p1"][date(2026, 3, 2)], -3)
-        self.assertEqual(result["p1"][date(2026, 3, 3)], -3)
+        self.assertEqual(result["p1"][date(2026, 3, 1)].points, -3)
+        self.assertFalse(result["p1"][date(2026, 3, 1)].participated)
+
+        self.assertEqual(result["p1"][date(2026, 3, 2)].points, -3)
+        self.assertFalse(result["p1"][date(2026, 3, 2)].participated)
+
+        self.assertEqual(result["p1"][date(2026, 3, 3)].points, -3)
+        self.assertFalse(result["p1"][date(2026, 3, 3)].participated)
 
     def test_valid_submission_overrides_missing(self):
         cycle_start = date(2026, 3, 1)
@@ -55,7 +60,8 @@ class TestScoringEngine(unittest.TestCase):
             missing_points=-3,
         )
 
-        self.assertEqual(result["p1"][date(2026, 3, 1)], 5)
+        self.assertEqual(result["p1"][date(2026, 3, 1)].points, 5)
+        self.assertTrue(result["p1"][date(2026, 3, 1)].participated)
 
     def test_duplicate_submissions_keep_earliest_valid(self):
         cycle_start = date(2026, 3, 1)
@@ -90,7 +96,8 @@ class TestScoringEngine(unittest.TestCase):
         )
 
         # Earliest wins => 2
-        self.assertEqual(result["p1"][date(2026, 3, 1)], 2)
+        self.assertEqual(result["p1"][date(2026, 3, 1)].points, 2)
+        self.assertTrue(result["p1"][date(2026, 3, 1)].participated)
 
 if __name__ == "__main__":
     unittest.main()

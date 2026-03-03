@@ -3,11 +3,16 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Dict, List
 from zoneinfo import ZoneInfo
+from dataclasses import dataclass
 
 from gymchallenge.models import Submission
 from gymchallenge.scoring_time import score_day_for_timestamp
 from gymchallenge.cycle_rules import score_day_in_cycle
 
+@dataclass(frozen=True)
+class DailyScore:
+    points: int
+    participated: bool
 
 def _date_range(start: date, end: date) -> List[date]:
     days = []
@@ -25,7 +30,7 @@ def compute_daily_scores(
     cycle_start: date,
     cycle_end: date,
     missing_points: int,
-) -> Dict[str, Dict[date, int]]:
+) -> Dict[str, Dict[date, DailyScore]]:
     """
     Return:
       {
@@ -43,7 +48,7 @@ def compute_daily_scores(
     for pid in participant_ids:
         result[pid] = {}
         for d in score_days:
-            result[pid][d] = missing_points
+            result[pid][d] = DailyScore(points=missing_points, participated=False)
 
     # 3) Overlay valid submissions onto the grid
     # Sort submissions by submitted_at ascending so earliest appear first.
@@ -72,7 +77,7 @@ def compute_daily_scores(
             continue
 
         # apply the earliest submission for this participant+score_day
-        result[sub.participant_id][sd] = sub.points
+        result[sub.participant_id][sd] = DailyScore(points=sub.points, participated=True)
         seen.add(key)
 
     return result
