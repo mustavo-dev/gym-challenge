@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 from dataclasses import dataclass
 
 from gymchallenge.models import Submission
+from gymchallenge.models import Membership
 from gymchallenge.scoring_time import score_day_for_timestamp
 from gymchallenge.cycle_rules import score_day_in_cycle
 
@@ -115,3 +116,58 @@ def detect_auto_inactive(
                 break  # stop scanning this participant after first trigger
 
     return updates
+
+def apply_auto_inactive(
+    memberships: List[Membership],
+    updates: Dict[str, date],
+) -> List[Membership]:
+    """Apply auto-inactive updates to memberships (pure; returns a new list)."""
+    new_list: List[Membership] = []
+
+    for m in memberships:
+        if m.participant_id in updates:
+            new_list.append(
+                Membership(
+                    cycle_id=m.cycle_id,
+                    participant_id=m.participant_id,
+                    active_in_cycle=False,
+                    joined_at=m.joined_at,
+                    left_at=m.left_at,
+                    inactive_reason="auto",
+                    inactive_effective_score_day=updates[m.participant_id],
+                )
+            )
+        else:
+            new_list.append(m)
+
+    return new_list
+
+
+def reactivate_member(
+    memberships: List[Membership],
+    participant_id: str,
+    effective_day: date,
+    reason: str,
+) -> List[Membership]:
+    """Reactivate a member (pure; returns a new list). Reason is required."""
+    if not reason.strip():
+        raise ValueError("reason is required")
+
+    new_list: List[Membership] = []
+    for m in memberships:
+        if m.participant_id == participant_id:
+            new_list.append(
+                Membership(
+                    cycle_id=m.cycle_id,
+                    participant_id=m.participant_id,
+                    active_in_cycle=True,
+                    joined_at=m.joined_at,
+                    left_at=m.left_at,
+                    inactive_reason=m.inactive_reason,  # keep historical reason
+                    inactive_effective_score_day=None,  # no longer currently inactive
+                )
+            )
+        else:
+            new_list.append(m)
+
+    return new_list
