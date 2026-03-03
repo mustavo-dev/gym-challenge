@@ -171,3 +171,55 @@ def reactivate_member(
             new_list.append(m)
 
     return new_list
+
+def build_leaderboard(
+    memberships: List[Membership],
+    daily: Dict[str, Dict[date, DailyScore]],
+    from_day: date,
+    to_day: date,
+    include_inactive: bool = True,
+) -> List[tuple[str, int]]:
+    """
+    Build a leaderboard: list of (participant_id, total_points) sorted by total desc,
+    then participant_id asc for deterministic ties.
+
+    Rules:
+    - If include_inactive is False: omit members where active_in_cycle is False.
+    - If include_inactive is True: include everyone, but for inactive members only count
+      days strictly before inactive_effective_score_day (exclude day D and beyond).
+    - Active members count all days in [from_day, to_day].
+    """
+    # 1) Determine which members are included
+    included: List[Membership] = []
+    for m in memberships:
+        if not include_inactive and not m.active_in_cycle:
+            continue
+        included.append(m)
+
+    # 2) Sum points per included member within allowed day range
+    results: List[tuple[str, int]] = []
+    for m in included:
+        pid = m.participant_id
+
+        # Determine last day to include (inclusive)
+        last_day = to_day
+        if include_inactive and (m.inactive_effective_score_day is not None):
+            # Exclude day D and beyond, so last included day is D-1
+            cutoff = m.inactive_effective_score_day - timedelta(days=1)
+            if cutoff < last_day:
+                last_day = cutoff
+
+        total = 0
+        if last_day >= from_day:
+            d = from_day
+            while d <= last_day:
+                day_score = daily.get(pid, {}).get(d)
+                if day_score is not None:
+                    total += day_score.points
+                d += timedelta(days=1)
+
+        results.append((pid, total))
+
+    # 3) Sort: total desc, then participant_id asc
+    results.sort(key=lambda x: (-x[1], x[0]))
+    return results
