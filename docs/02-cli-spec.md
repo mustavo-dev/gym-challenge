@@ -2,7 +2,7 @@
 
 ## cycle
 
-* cycle create --cycle-id ... --name ... --start ... --end ... --tz Europe/Berlin
+* cycle create --cycle-id ... --name ... --start-day YYYY-MM-DD ... --end-day YYYY-MM-DD ... --tz Europe/Berlin
 * cycle list
 * cycle activate --cycle-id ...
 * cycle close --cycle-id ...
@@ -26,7 +26,9 @@
 
 ## admin
 
-* admin correct --cycle-id ... --name "First Last" --score-day YYYY-MM-DD --points N \[--reason "..."]
+* admin correct --cycle-id ... --name "Last, First" --score-day YYYY-MM-DD --points N --reason "..."
+* admin reactivate --cycle-id ... --name "Last, First" [--effective-day YYYY-MM-DD] --reason "..."
+* admin apply-auto-inactive --cycle-id ... --through YYYY-MM-DD
 
 ## report
 

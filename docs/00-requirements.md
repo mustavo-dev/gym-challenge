@@ -50,6 +50,9 @@ Must support 3-month cycles, cycle restarts, and concurrent cycles.
 
 * 4 Consecutive missed score days → auto-inactive in that cycle
 * Auto-inactive is based on participant submissions, not corrections
+* Admin can reactivate an inactive member in a cycle with:
+  * required reason
+  * optional effective score day (defaults to next score day if not provided)
 
 ## Persistence (v1)
 

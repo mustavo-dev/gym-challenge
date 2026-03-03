@@ -26,12 +26,27 @@ Links Participant ↔ Cycle
 
 * cycle\_id
 * participant\_id
-* active\_in\_cycle
+* active_in_cycle = True
 * joined\_at
 * left\_at (optional)
 * auto_inactive: bool
 * inactive_reason: "manual"|"auto"
 * inactive_effective_score_day: date | None
+
+#### Membership state transitions (MVP)
+
+Reactivation is represented by updating Membership fields (no separate event log in MVP):
+
+- When a member becomes inactive (manual or auto):
+  - active_in_cycle = False
+  - inactive_reason = "manual" or "auto"
+  - inactive_effective_score_day = the first score day they are considered inactive
+
+- When an admin reactivates a member:
+  - active_in_cycle = True
+  - inactive_reason remains as historical info (last known reason), or may be set to "manual" if preferred
+  - inactive_effective_score_day = None
+  - The reactivate command may specify an effective score day; if provided, the member is treated as active starting on that score day (otherwise defaults to next score day).
 
 ### Submission (raw event)
 
