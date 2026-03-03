@@ -12,4 +12,6 @@
 - Persistence v1: JSON (data/ gitignored), upgrade to SQLite later
 - Output v1: console + CSV
 - inactive_behavior configuration exists (historical|exclude)
-- auto-inactive after 4 consecutive misses (based on submissions, not corrections unless also active status changed to active following admin correction
+- auto-inactive after 4 consecutive misses is based on valid participant submissions; corrections do not reset the streak
+- auto-inactive becomes effective the day after the 4th consecutive miss (the 4th miss still gets -3)
+

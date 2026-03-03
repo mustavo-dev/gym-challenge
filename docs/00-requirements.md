@@ -26,7 +26,7 @@ Must support 3-month cycles, cycle restarts, and concurrent cycles.
 
 ## Cycle rules
 
-* A cycle has: cycle\_id, start\_dt, end\_dt, timezone, status
+* A cycle has: cycle\_id, start_score_day, end_score_day, timezone, status
 * Cycles may run:
 
   * sequentially (restart every ~3 months)
@@ -44,12 +44,12 @@ Must support 3-month cycles, cycle restarts, and concurrent cycles.
 
 ## Reporting Policies
 
-* Inactive handling models: historical vs exclue
+* Inactive handling models: historical vs exclude
 
 ## Auto-inactive rule
 
 * 4 Consecutive missed score days → auto-inactive in that cycle
-* Admin correction does not count unless active mode enabled
+* Auto-inactive is based on participant submissions, not corrections
 
 ## Persistence (v1)
 

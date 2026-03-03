@@ -14,9 +14,9 @@
 
 * cycle\_id (string, unique)
 * name
-* timezone (Europe/Berlin)
-* start\_dt
-* end\_dt
+* timezone: str (Europe/Berlin)
+* start_score_day: date
+* end_score_day: date
 * status: planned|active|closed
 * Cycle includes score days up to end\_score\_day; last window closes at 12:00 following day
 
