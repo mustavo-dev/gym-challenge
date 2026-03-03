@@ -10,4 +10,18 @@ fi
 source .venv/bin/activate
 
 python3 -m pip install --upgrade pip >/dev/null
-python3 src/main.py
+
+cmd="${1:-run}"
+case "$cmd" in
+  run)
+    python3 src/main.py
+    ;;
+  test)
+    PYTHONPATH=src python3 -m unittest discover -s tests -q
+    ;;
+  *)
+    echo "Usage: $0 [run|test]"
+    exit 2
+    ;;
+esac
+

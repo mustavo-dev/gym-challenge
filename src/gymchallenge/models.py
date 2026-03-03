@@ -37,6 +37,10 @@ class Membership:
     joined_at: datetime
     left_at: Optional[datetime] = None
 
+    # Inactive tracking (per-cycle)
+    inactive_reason: Optional[str] = None  # "manual" | "auto"
+    inactive_effective_score_day: Optional[date] = None
+
 
 @dataclass(frozen=True)
 class Submission:
