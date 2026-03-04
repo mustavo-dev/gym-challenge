@@ -261,6 +261,31 @@ def cmd_membership_reactivate(args: argparse.Namespace) -> int:
     print(f"Reactivated membership: cycle={cycle_id} participant={participant_id} effective_day={effective_day.isoformat()}")
     return 0
 
+def cmd_membership_deactivate(args: argparse.Namespace) -> int:
+    cycle_id = args.cycle_id.strip()
+    participant_id = args.participant_id.strip()
+    reason = args.reason.strip()
+    effective_day = date.fromisoformat(args.effective_day)
+
+    if not reason:
+        raise ValueError("reason is required")
+
+    path = data_path("memberships.json")
+    rows = load_list(path)
+
+    idx = find_membership_index(rows, cycle_id=cycle_id, participant_id=participant_id)
+    if idx is None:
+        raise ValueError(f"Membership not found: cycle={cycle_id} participant={participant_id}")
+
+    rows[idx]["active_in_cycle"] = False
+    rows[idx]["inactive_reason"] = "manual"
+    rows[idx]["inactive_effective_score_day"] = effective_day.isoformat()
+
+    save_list(path, rows)
+
+    print(f"Deactivated membership: cycle={cycle_id} participant={participant_id} effective_day={effective_day.isoformat()}")
+    return 0
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="gym-challenge")
 
@@ -297,6 +322,13 @@ def build_parser() -> argparse.ArgumentParser:
     m_reactivate.add_argument("--effective-day", required=True, help="YYYY-MM-DD")
     m_reactivate.add_argument("--reason", required=True)
     m_reactivate.set_defaults(func=cmd_membership_reactivate)
+
+    m_deactivate = membership_sub.add_parser("deactivate", help="Deactivate a membership (reason required)")
+    m_deactivate.add_argument("--cycle-id", required=True)
+    m_deactivate.add_argument("--participant-id", required=True)
+    m_deactivate.add_argument("--effective-day", required=True, help="YYYY-MM-DD")
+    m_deactivate.add_argument("--reason", required=True)
+    m_deactivate.set_defaults(func=cmd_membership_deactivate)
 
     # submission commands
     p_submission = sub.add_parser("submission", help="Manage submissions")
