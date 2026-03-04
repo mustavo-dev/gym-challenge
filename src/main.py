@@ -8,12 +8,13 @@ from zoneinfo import ZoneInfo
 
 from gymchallenge.models import Submission, Correction, Membership
 from gymchallenge.scoring_engine import compute_daily_scores, build_leaderboard
-from gymchallenge.storage_json import load_list
+from gymchallenge.storage_json import load_list, save_list
 from gymchallenge.data_paths import data_path, exports_path
 from gymchallenge.participant_ops import generate_participant_id
 from gymchallenge.storage_ops import append_row
 from gymchallenge.membership_ops import has_membership
 from gymchallenge.id_ops import new_submission_id, new_correction_id
+from gymchallenge.membership_store import find_membership_index
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -233,6 +234,33 @@ def cmd_correction_add(args: argparse.Namespace) -> int:
     print(f"Added correction: {row['correction_id']} participant={participant_id} day={row['score_day']} points={points}")
     return 0
 
+def cmd_membership_reactivate(args: argparse.Namespace) -> int:
+    cycle_id = args.cycle_id.strip()
+    participant_id = args.participant_id.strip()
+    reason = args.reason.strip()
+    effective_day = date.fromisoformat(args.effective_day)
+
+    if not reason:
+        raise ValueError("reason is required")
+
+    path = data_path("memberships.json")
+    rows = load_list(path)
+
+    idx = find_membership_index(rows, cycle_id=cycle_id, participant_id=participant_id)
+    if idx is None:
+        raise ValueError(f"Membership not found: cycle={cycle_id} participant={participant_id}")
+
+    # Update in place (MVP):
+    rows[idx]["active_in_cycle"] = True
+    rows[idx]["inactive_effective_score_day"] = None
+    # keep inactive_reason as historical metadata
+    # NOTE: effective_day is accepted but not stored yet (future scheduling)
+
+    save_list(path, rows)
+
+    print(f"Reactivated membership: cycle={cycle_id} participant={participant_id} effective_day={effective_day.isoformat()}")
+    return 0
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="gym-challenge")
 
@@ -262,6 +290,13 @@ def build_parser() -> argparse.ArgumentParser:
     m_add.add_argument("--cycle-id", required=True)
     m_add.add_argument("--participant-id", required=True)
     m_add.set_defaults(func=cmd_membership_add)
+
+    m_reactivate = membership_sub.add_parser("reactivate", help="Reactivate a membership (reason required)")
+    m_reactivate.add_argument("--cycle-id", required=True)
+    m_reactivate.add_argument("--participant-id", required=True)
+    m_reactivate.add_argument("--effective-day", required=True, help="YYYY-MM-DD")
+    m_reactivate.add_argument("--reason", required=True)
+    m_reactivate.set_defaults(func=cmd_membership_reactivate)
 
     # submission commands
     p_submission = sub.add_parser("submission", help="Manage submissions")
