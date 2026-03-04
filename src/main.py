@@ -10,7 +10,8 @@ from gymchallenge.models import Submission, Correction, Membership
 from gymchallenge.scoring_engine import compute_daily_scores, build_leaderboard
 from gymchallenge.storage_json import load_list
 from gymchallenge.data_paths import data_path, exports_path
-
+from gymchallenge.participant_ops import generate_participant_id
+from gymchallenge.storage_ops import append_row
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -122,11 +123,44 @@ def cmd_report(args: argparse.Namespace) -> int:
     print(f"\nCSV export written to: {out_path}")
     return 0
 
+def cmd_participant_add(args: argparse.Namespace) -> int:
+    first = args.first.strip()
+    last = args.last.strip()
+
+    if not first or not last:
+        raise ValueError("first and last are required")
+
+    path = data_path("participants.json")
+    existing = load_list(path)
+
+    participant_id = generate_participant_id(first=first, last=last, existing_rows=existing)
+
+    row = {
+        "participant_id": participant_id,
+        "first_name": first,
+        "last_name": last,
+        "created_at": datetime.now(BERLIN).isoformat(),
+        "active": True,
+    }
+
+    append_row(path, row)
+
+    print(f"Added participant: {participant_id} ({last}, {first})")
+    return 0
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="gym-challenge")
 
     sub = parser.add_subparsers(dest="cmd", required=True)
+
+    # participant commands
+    p_participant = sub.add_parser("participant", help="Manage participants")
+    participant_sub = p_participant.add_subparsers(dest="participant_cmd", required=True)
+
+    p_add = participant_sub.add_parser("add", help="Add a participant")
+    p_add.add_argument("--first", required=True)
+    p_add.add_argument("--last", required=True)
+    p_add.set_defaults(func=cmd_participant_add)
 
     report = sub.add_parser("report", help="Generate leaderboard report")
     report.add_argument("--from", dest="from_day", required=True)
