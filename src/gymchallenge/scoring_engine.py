@@ -5,8 +5,7 @@ from typing import Dict, List
 from zoneinfo import ZoneInfo
 from dataclasses import dataclass
 
-from gymchallenge.models import Submission
-from gymchallenge.models import Membership
+from gymchallenge.models import Submission, Membership, Correction
 from gymchallenge.scoring_time import score_day_for_timestamp
 from gymchallenge.cycle_rules import score_day_in_cycle
 
@@ -31,6 +30,7 @@ def compute_daily_scores(
     cycle_start: date,
     cycle_end: date,
     missing_points: int,
+    corrections: List[Correction] | None = None,
 ) -> Dict[str, Dict[date, DailyScore]]:
     """
     Return:
@@ -80,6 +80,32 @@ def compute_daily_scores(
         # apply the earliest submission for this participant+score_day
         result[sub.participant_id][sd] = DailyScore(points=sub.points, participated=True)
         seen.add(key)
+
+    # 4) Apply corrections (points only; does NOT change participated)
+    if corrections:
+        # latest correction wins => sort by created_at ascending and overwrite as we go
+        corrections_sorted = sorted(corrections, key=lambda c: c.created_at)
+
+        for corr in corrections_sorted:
+            if corr.participant_id not in result:
+                continue
+
+            if not score_day_in_cycle(corr.score_day, cycle_start, cycle_end):
+                continue
+
+            existing = result[corr.participant_id].get(corr.score_day)
+            if existing is None:
+                # if the day isn't present for some reason, create an entry as non-participated
+                result[corr.participant_id][corr.score_day] = DailyScore(
+                    points=corr.new_points,
+                    participated=False,
+                )
+            else:
+                # override points, keep participated flag unchanged
+                result[corr.participant_id][corr.score_day] = DailyScore(
+                    points=corr.new_points,
+                    participated=existing.participated,
+                )
 
     return result
 
