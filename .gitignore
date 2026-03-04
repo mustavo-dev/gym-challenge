@@ -5,3 +5,10 @@ __pycache__/
 secrets/
 .DS_Store
 Thumbs.db
+# Local runtime data (not committed)
+data/*.json
+exports/*.csv
+
+# allow placeholders
+!data/.keep
+!exports/.keep
