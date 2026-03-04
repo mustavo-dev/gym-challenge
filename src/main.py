@@ -13,6 +13,7 @@ from gymchallenge.data_paths import data_path, exports_path
 from gymchallenge.participant_ops import generate_participant_id
 from gymchallenge.storage_ops import append_row
 from gymchallenge.membership_ops import has_membership
+from gymchallenge.id_ops import new_submission_id
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -177,6 +178,33 @@ def cmd_membership_add(args: argparse.Namespace) -> int:
     print(f"Added membership: cycle={cycle_id} participant={participant_id}")
     return 0
 
+def cmd_submission_add(args: argparse.Namespace) -> int:
+    cycle_id = args.cycle_id.strip()
+    participant_id = args.participant_id.strip()
+    points = int(args.points)
+
+    if points < -3 or points > 5:
+        raise ValueError("points must be between -3 and 5")
+
+    if args.submitted_at:
+        submitted_at = datetime.fromisoformat(args.submitted_at)
+    else:
+        submitted_at = datetime.now(BERLIN)
+
+    row = {
+        "submission_id": new_submission_id(),
+        "cycle_id": cycle_id,
+        "participant_id": participant_id,
+        "submitted_at": submitted_at.isoformat(),
+        "points": points,
+        "source": "manual",
+    }
+
+    append_row(data_path("submissions.json"), row)
+
+    print(f"Added submission: {row['submission_id']} participant={participant_id} points={points} at={row['submitted_at']}")
+    return 0
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="gym-challenge")
 
@@ -206,6 +234,17 @@ def build_parser() -> argparse.ArgumentParser:
     m_add.add_argument("--cycle-id", required=True)
     m_add.add_argument("--participant-id", required=True)
     m_add.set_defaults(func=cmd_membership_add)
+
+    # submission commands
+    p_submission = sub.add_parser("submission", help="Manage submissions")
+    submission_sub = p_submission.add_subparsers(dest="submission_cmd", required=True)
+
+    s_add = submission_sub.add_parser("add", help="Add a submission")
+    s_add.add_argument("--cycle-id", required=True)
+    s_add.add_argument("--participant-id", required=True)
+    s_add.add_argument("--points", required=True)
+    s_add.add_argument("--submitted-at", required=False, help="ISO8601 timestamp; default now")
+    s_add.set_defaults(func=cmd_submission_add)
 
     return parser
 
