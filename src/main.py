@@ -13,7 +13,7 @@ from gymchallenge.data_paths import data_path, exports_path
 from gymchallenge.participant_ops import generate_participant_id
 from gymchallenge.storage_ops import append_row
 from gymchallenge.membership_ops import has_membership
-from gymchallenge.id_ops import new_submission_id
+from gymchallenge.id_ops import new_submission_id, new_correction_id
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -205,6 +205,34 @@ def cmd_submission_add(args: argparse.Namespace) -> int:
     print(f"Added submission: {row['submission_id']} participant={participant_id} points={points} at={row['submitted_at']}")
     return 0
 
+def cmd_correction_add(args: argparse.Namespace) -> int:
+    cycle_id = args.cycle_id.strip()
+    participant_id = args.participant_id.strip()
+    score_day = date.fromisoformat(args.score_day)
+    points = int(args.points)
+    reason = args.reason.strip()
+
+    if points < -3 or points > 5:
+        raise ValueError("points must be between -3 and 5")
+
+    if not reason:
+        raise ValueError("reason is required")
+
+    row = {
+        "correction_id": new_correction_id(),
+        "cycle_id": cycle_id,
+        "participant_id": participant_id,
+        "score_day": score_day.isoformat(),
+        "new_points": points,
+        "reason": reason,
+        "created_at": datetime.now(BERLIN).isoformat(),
+        "admin": "jayme",  # MVP default; later: --admin
+    }
+
+    append_row(data_path("corrections.json"), row)
+    print(f"Added correction: {row['correction_id']} participant={participant_id} day={row['score_day']} points={points}")
+    return 0
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="gym-challenge")
 
@@ -245,6 +273,18 @@ def build_parser() -> argparse.ArgumentParser:
     s_add.add_argument("--points", required=True)
     s_add.add_argument("--submitted-at", required=False, help="ISO8601 timestamp; default now")
     s_add.set_defaults(func=cmd_submission_add)
+
+    # correction commands
+    p_correction = sub.add_parser("correction", help="Manage admin corrections")
+    correction_sub = p_correction.add_subparsers(dest="correction_cmd", required=True)
+
+    c_add = correction_sub.add_parser("add", help="Add a correction (reason required)")
+    c_add.add_argument("--cycle-id", required=True)
+    c_add.add_argument("--participant-id", required=True)
+    c_add.add_argument("--score-day", required=True, help="YYYY-MM-DD")
+    c_add.add_argument("--points", required=True)
+    c_add.add_argument("--reason", required=True)
+    c_add.set_defaults(func=cmd_correction_add)
 
     return parser
 
