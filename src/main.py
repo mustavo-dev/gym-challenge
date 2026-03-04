@@ -12,6 +12,7 @@ from gymchallenge.storage_json import load_list
 from gymchallenge.data_paths import data_path, exports_path
 from gymchallenge.participant_ops import generate_participant_id
 from gymchallenge.storage_ops import append_row
+from gymchallenge.membership_ops import has_membership
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -148,6 +149,34 @@ def cmd_participant_add(args: argparse.Namespace) -> int:
     print(f"Added participant: {participant_id} ({last}, {first})")
     return 0
 
+def cmd_membership_add(args: argparse.Namespace) -> int:
+    cycle_id = args.cycle_id.strip()
+    participant_id = args.participant_id.strip()
+
+    if not cycle_id or not participant_id:
+        raise ValueError("cycle-id and participant-id are required")
+
+    path = data_path("memberships.json")
+    existing = load_list(path)
+
+    if has_membership(existing, cycle_id=cycle_id, participant_id=participant_id):
+        print(f"Membership already exists: cycle={cycle_id} participant={participant_id}")
+        return 0
+
+    row = {
+        "cycle_id": cycle_id,
+        "participant_id": participant_id,
+        "active_in_cycle": True,
+        "joined_at": datetime.now(BERLIN).isoformat(),
+        "left_at": None,
+        "inactive_reason": None,
+        "inactive_effective_score_day": None,
+    }
+
+    append_row(path, row)
+    print(f"Added membership: cycle={cycle_id} participant={participant_id}")
+    return 0
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="gym-challenge")
 
@@ -168,6 +197,15 @@ def build_parser() -> argparse.ArgumentParser:
     report.add_argument("--include-inactive", action="store_true")
 
     report.set_defaults(func=cmd_report)
+
+    # membership commands
+    p_membership = sub.add_parser("membership", help="Manage cycle memberships")
+    membership_sub = p_membership.add_subparsers(dest="membership_cmd", required=True)
+
+    m_add = membership_sub.add_parser("add", help="Add a participant to a cycle")
+    m_add.add_argument("--cycle-id", required=True)
+    m_add.add_argument("--participant-id", required=True)
+    m_add.set_defaults(func=cmd_membership_add)
 
     return parser
 
