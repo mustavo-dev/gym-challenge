@@ -67,6 +67,47 @@ Only a valid participant submission or manual admin action can reactivate someon
 * Participant membership is per-cycle
 * Cycle end includes final submission window until 12:00 next day
 
+## Cycle Lifecycle Rules
+
+Cycles are date-driven and use the Berlin scoring window.
+
+Each cycle has:
+- cycle_id
+- name
+- start_day
+- end_day
+- created_at
+
+Cycle states are:
+
+- planned
+- active
+- closed
+
+These states are automatically derived from the current time and scoring window.
+
+### Scoring Window
+
+- A score day opens at 20:00 Europe/Berlin
+- A score day closes at 12:00 Europe/Berlin on the next day
+
+### State Rules
+
+A cycle is:
+
+- **planned** before `start_day` at 20:00 Berlin
+- **active** from `start_day` at 20:00 Berlin until `end_day + 1 day` at 12:00 Berlin
+- **closed** after `end_day + 1 day` at 12:00 Berlin
+
+### Business Rules
+
+- Only one cycle may be active at a time
+- Future cycles may be created in advance
+- Future cycles remain planned until their start window opens
+- Active cycles automatically become closed after their final scoring window ends
+- Closed cycles remain available for historical reporting
+- No two cycles may have overlapping active windows
+
 ## Reporting (v1)
 
 * Console leaderboard summary

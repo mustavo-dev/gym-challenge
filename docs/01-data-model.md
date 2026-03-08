@@ -12,13 +12,38 @@
 
 ### Cycle
 
-* cycle\_id (string, unique)
-* name
-* timezone: str (Europe/Berlin)
-* start_score_day: date
-* end_score_day: date
-* status: planned|active|closed
-* Cycle includes score days up to end\_score\_day; last window closes at 12:00 following day
+- cycle_id
+- name
+- start_day
+- end_day
+- created_at
+
+### Derived Cycle Status
+
+Cycle status is not manually controlled in normal operation.
+
+Instead, the system derives the effective status from:
+- current time
+- scoring window
+- cycle start_day
+- cycle end_day
+
+Possible derived states:
+- planned
+- active
+- closed
+
+#### Cycle Active Window
+
+A cycle's active window is defined as:
+
+- opens: `start_day` at 20:00 Europe/Berlin
+- closes: `end_day + 1 day` at 12:00 Europe/Berlin
+
+This active window is used to:
+- determine cycle status
+- prevent overlapping active cycles
+- control when submissions are valid for a cycle
 
 ### Membership
 

@@ -2,10 +2,18 @@
 
 ## cycle
 
-* cycle create --cycle-id ... --name ... --start-day YYYY-MM-DD ... --end-day YYYY-MM-DD ... --tz Europe/Berlin
-* cycle list
-* cycle activate --cycle-id ...
-* cycle close --cycle-id ...
+- `cycle create --season <spring|summer|fall|winter> --year <YYYY> --start <YYYY-MM-DD> --end <YYYY-MM-DD>`
+- `cycle list`
+
+### Cycle Rules
+
+- Creating a future cycle is allowed
+- Cycle status is automatically derived from dates and scoring window
+- A cycle cannot be created if its active window overlaps an existing cycle's active window
+- Only one cycle may be active at a time
+
+Future planned CLI commands may include:
+- `cycle show`
 
 ## participant
 
