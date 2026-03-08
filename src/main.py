@@ -7,7 +7,7 @@ from datetime import date, datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from gymchallenge.models import Submission, Correction, Membership, MembershipEvent
+from gymchallenge.models import Submission, Correction, Membership, MembershipEvent, Cycle
 from gymchallenge.scoring_engine import compute_daily_scores, build_leaderboard, detect_auto_inactive, apply_auto_inactive, reactivate_member
 from gymchallenge.storage_json import load_list, save_list
 from gymchallenge.data_paths import data_path, exports_path
@@ -20,6 +20,7 @@ from gymchallenge.membership_event_ops import append_membership_event
 from gymchallenge.system_event_ops import append_missing_auto_inactive_events, append_missing_auto_reactivate_events
 from gymchallenge.reactivation_ops import detect_auto_reactivate
 from gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_active_cycle, has_cycle_id
+from gymchallenge.cycle_timeline import cycle_status, cycle_overlaps_existing
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -93,6 +94,21 @@ def load_membership_events(rows: list[dict[str, Any]]) -> list[MembershipEvent]:
                 reason=r["reason"],
                 created_at=datetime.fromisoformat(r["created_at"]),
                 actor=r["actor"],
+            )
+        )
+    return out
+
+def load_cycles(rows: list[dict[str, Any]]) -> list[Cycle]:
+    out: list[Cycle] = []
+    for r in rows:
+        out.append(
+            Cycle(
+                cycle_id=r["cycle_id"],
+                name=r["name"],
+                start_day=date.fromisoformat(r["start_day"]),
+                end_day=date.fromisoformat(r["end_day"]),
+                created_at=datetime.fromisoformat(r["created_at"]),
+                active=bool(r.get("active", True)),  # legacy field retained for now
             )
         )
     return out
@@ -519,11 +535,22 @@ def cmd_cycle_create(args: argparse.Namespace) -> int:
     path = data_path("cycles.json")
     rows = load_list(path)
 
-    if has_active_cycle(rows):
-        raise ValueError("cannot create a new active cycle while another active cycle exists")
-
     cycle_id = build_cycle_id(season, year)
     name = build_cycle_name(season, year)
+
+    new_cycle = Cycle(
+        cycle_id=cycle_id,
+        name=name,
+        start_day=start_day,
+        end_day=end_day,
+        created_at=datetime.now(BERLIN),
+        active=True,  # legacy field retained for now
+    )
+
+    existing_cycles = load_cycles(rows)
+
+    if cycle_overlaps_existing(new_cycle, existing_cycles, BERLIN):
+        raise ValueError("new cycle overlaps an existing cycle active window")
 
     if has_cycle_id(rows, cycle_id):
         raise ValueError(f"cycle already exists: {cycle_id}")
@@ -548,11 +575,15 @@ def cmd_cycle_list(args: argparse.Namespace) -> int:
         print("No cycles found.")
         return 0
 
+    cycles = load_cycles(rows)
+    now = datetime.now(BERLIN)
+
     print("Cycles:")
-    for row in rows:
+    for cycle in cycles:
+        status = cycle_status(cycle, now, BERLIN)
         print(
-            f"- {row['cycle_id']} | {row['name']} | "
-            f"{row['start_day']}..{row['end_day']} | active={row['active']}"
+            f"- {cycle.cycle_id} | {cycle.name} | "
+            f"{cycle.start_day.isoformat()}..{cycle.end_day.isoformat()} | {status}"
         )
 
     return 0
