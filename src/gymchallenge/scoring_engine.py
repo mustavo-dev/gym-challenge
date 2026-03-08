@@ -203,6 +203,7 @@ def build_leaderboard(
     daily: Dict[str, Dict[date, DailyScore]],
     from_day: date,
     to_day: date,
+    tz: ZoneInfo,
     include_inactive: bool = True,
 ) -> List[tuple[str, int]]:
     """
@@ -224,21 +225,35 @@ def build_leaderboard(
 
     # 2) Sum points per included member within allowed day range
     results: List[tuple[str, int]] = []
+
     for m in included:
         pid = m.participant_id
 
-        # Determine last day to include (inclusive)
-        last_day = to_day
-        if include_inactive and (m.inactive_effective_score_day is not None):
-            # Exclude day D and beyond, so last included day is D-1
+        # Compute membership start day (inclusive)
+        join_sd = score_day_for_timestamp(m.joined_at, tz)
+        start_day = max(from_day, join_sd if join_sd is not None else from_day)
+
+        # Compute membership end day (inclusive)
+        end_day = to_day
+
+        # Inactive cutoff: exclude day D and beyond => last included is D-1
+        if m.inactive_effective_score_day is not None:
             cutoff = m.inactive_effective_score_day - timedelta(days=1)
-            if cutoff < last_day:
-                last_day = cutoff
+            if cutoff < end_day:
+                end_day = cutoff
+
+        # Left cutoff: exclude left score-day and beyond => last included is left_sd-1
+        if m.left_at is not None:
+            left_sd = score_day_for_timestamp(m.left_at, tz)
+            if left_sd is not None:
+                cutoff = left_sd - timedelta(days=1)
+                if cutoff < end_day:
+                    end_day = cutoff
 
         total = 0
-        if last_day >= from_day:
-            d = from_day
-            while d <= last_day:
+        if end_day >= start_day:
+            d = start_day
+            while d <= end_day:
                 day_score = daily.get(pid, {}).get(d)
                 if day_score is not None:
                     total += day_score.points

@@ -102,6 +102,7 @@ def cmd_report(args: argparse.Namespace) -> int:
 
     leaderboard = build_leaderboard(
         memberships=memberships,
+        tz=BERLIN,
         daily=daily,
         from_day=from_day,
         to_day=to_day,

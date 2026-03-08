@@ -1,9 +1,11 @@
 import unittest
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 from gymchallenge.models import Membership
 from gymchallenge.scoring_engine import DailyScore, build_leaderboard
 
+BERLIN = ZoneInfo("Europe/Berlin")
 
 class TestLeaderboard(unittest.TestCase):
     def test_historical_inactive_stays_visible_but_stops_scoring(self):
@@ -45,6 +47,7 @@ class TestLeaderboard(unittest.TestCase):
 
         lb = build_leaderboard(
             memberships=memberships,
+            tz=BERLIN,
             daily=daily,
             from_day=date(2026, 3, 1),
             to_day=date(2026, 3, 4),
@@ -90,6 +93,7 @@ class TestLeaderboard(unittest.TestCase):
 
         lb = build_leaderboard(
             memberships=memberships,
+            tz=BERLIN,
             daily=daily,
             from_day=date(2026, 3, 1),
             to_day=date(2026, 3, 2),

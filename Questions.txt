@@ -1,0 +1,4 @@
+- What happens if Jayme edits the .csv file?
+- For the leader board can we change the appearance of the displayed information? Right now, it shows participant ID but it would be more user friendly if it was Last, First name, and only using the number determination when there are more then one person with the same name. Maybe even adding their middle initial in those edge cases when two participants have the same Last, First name, for display purposes on the leaderboard. 
+- Talked to Jayme, she does not want multiple challenges running at the same time. If people don't get admitted at the beginning they have to wait until the next one. 
+- Also, Jayme's UI for the admin panel needs to be different then the UI for the participants. Participants should have drop down menu's to select their name, and select a score of -3 to 5. Jayme's UI should have all of the admin privileges easily accessible to her. 
