@@ -22,6 +22,7 @@ from gymchallenge.reactivation_ops import detect_auto_reactivate
 from gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_active_cycle, has_cycle_id
 from gymchallenge.cycle_timeline import cycle_status, cycle_overlaps_existing, cycle_window_start, cycle_window_end
 from gymchallenge.cycle_store import find_cycle_row
+from gymchallenge.display_names import build_display_name_map
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -123,6 +124,8 @@ def cmd_report(args: argparse.Namespace) -> int:
     membership_events = load_membership_events(load_list(data_path("membership_events.json")))
     submissions = load_submissions(load_list(data_path("submissions.json")))
     corrections = load_corrections(load_list(data_path("corrections.json")))
+    participant_rows = load_list(data_path("participants.json"))
+    display_name_map = build_display_name_map(participant_rows)
 
     participant_ids = sorted({m.participant_id for m in memberships})
 
@@ -152,17 +155,19 @@ def cmd_report(args: argparse.Namespace) -> int:
     print(f"\nLeaderboard {from_day.isoformat()}..{to_day.isoformat()} (include_inactive={include_inactive})")
 
     for rank, (pid, total) in enumerate(leaderboard, start=1):
-        print(f"{rank:>2}. {pid}: {total}")
+        display_name = display_name_map.get(pid, pid)
+        print(f"{rank:>2}. {display_name}: {total}")
 
     out_name = f"leaderboard_{from_day.isoformat()}_{to_day.isoformat()}.csv"
     out_path = exports_path(out_name)
 
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["rank", "participant_id", "total_points"])
+        writer.writerow(["rank", "participant_id", "display_name", "total_points"])
 
         for rank, (pid, total) in enumerate(leaderboard, start=1):
-            writer.writerow([rank, pid, total])
+            display_name = display_name_map.get(pid, pid)
+            writer.writerow([rank, pid, display_name, total])
 
     print(f"\nCSV export written to: {out_path}")
     return 0
