@@ -62,3 +62,14 @@ class Correction:
     reason: str  # REQUIRED
     created_at: datetime
     admin: str
+
+@dataclass(frozen=True)
+class MembershipEvent:
+    event_id: str
+    cycle_id: str
+    participant_id: str
+    event_type: str  # auto_inactive | manual_inactive | manual_reactivate | auto_reactivate_submission
+    effective_score_day: date
+    reason: str
+    created_at: datetime
+    actor: str  # system | jayme
