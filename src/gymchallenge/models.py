@@ -23,10 +23,10 @@ class Participant:
 class Cycle:
     cycle_id: str
     name: str
-    timezone: str  # "Europe/Berlin"
-    start_score_day: date
-    end_score_day: date
-    status: str  # planned|active|closed
+    start_day: date
+    end_day: date
+    created_at: datetime
+    active: bool = True
 
 
 @dataclass(frozen=True)
