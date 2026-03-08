@@ -541,6 +541,22 @@ def cmd_cycle_create(args: argparse.Namespace) -> int:
     print(f"Created cycle: {cycle_id} ({name}) {start_day.isoformat()}..{end_day.isoformat()}")
     return 0
 
+def cmd_cycle_list(args: argparse.Namespace) -> int:
+    rows = load_list(data_path("cycles.json"))
+
+    if not rows:
+        print("No cycles found.")
+        return 0
+
+    print("Cycles:")
+    for row in rows:
+        print(
+            f"- {row['cycle_id']} | {row['name']} | "
+            f"{row['start_day']}..{row['end_day']} | active={row['active']}"
+        )
+
+    return 0
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="gym-challenge")
 
@@ -572,6 +588,9 @@ def build_parser() -> argparse.ArgumentParser:
     c_create.add_argument("--start", dest="start_day", required=True, help="YYYY-MM-DD")
     c_create.add_argument("--end", dest="end_day", required=True, help="YYYY-MM-DD")
     c_create.set_defaults(func=cmd_cycle_create)
+
+    c_list = cycle_sub.add_parser("list", help="List cycles")
+    c_list.set_defaults(func=cmd_cycle_list)
 
     # participant commands
     p_participant = sub.add_parser("participant", help="Manage participants")
