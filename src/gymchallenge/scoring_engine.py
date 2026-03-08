@@ -5,9 +5,10 @@ from typing import Dict, List
 from zoneinfo import ZoneInfo
 from dataclasses import dataclass
 
-from gymchallenge.models import Submission, Membership, Correction
+from gymchallenge.models import Submission, Membership, Correction, MembershipEvent
 from gymchallenge.scoring_time import score_day_for_timestamp
 from gymchallenge.cycle_rules import score_day_in_cycle
+from gymchallenge.membership_timeline import build_active_day_map
 
 @dataclass(frozen=True)
 class DailyScore:
@@ -200,6 +201,7 @@ def reactivate_member(
 
 def build_leaderboard(
     memberships: List[Membership],
+    membership_events: List[MembershipEvent],
     daily: Dict[str, Dict[date, DailyScore]],
     from_day: date,
     to_day: date,
@@ -223,50 +225,33 @@ def build_leaderboard(
             continue
         included.append(m)
 
-    # 2) Sum points per included member within allowed day range
+    # 2) Sum points per included member within active_map
     results: List[tuple[str, int]] = []
 
     for m in included:
         pid = m.participant_id
 
-        # Compute membership start day (inclusive)
-        join_sd = score_day_for_timestamp(m.joined_at, tz)
-        start_day = max(from_day, join_sd if join_sd is not None else from_day)
+        member_events = [
+            e
+            for e in membership_events
+            if e.cycle_id == m.cycle_id and e.participant_id == pid
+        ]
+
+        active_map = build_active_day_map(
+            membership=m,
+            events=member_events,
+            from_day=from_day,
+            to_day=to_day,
+            tz=tz,
+        )
 
         total = 0
-
-        # If left_at exists, determine the first score day that should be excluded.
-        # Days on/after left_sd do not count.
-        left_sd = None
-        if m.left_at is not None:
-            left_sd = score_day_for_timestamp(m.left_at, tz)
-
-        # Track whether the member is currently inactive.
-        # If inactive_effective_score_day exists, they become inactive starting on that day.
-        currently_inactive = False
-
-        d = start_day
+        d = from_day
         while d <= to_day:
-            # Do not count days on/after left score day
-            if left_sd is not None and d >= left_sd:
-                break
-
-            # Enter inactive state on the effective day
-            if m.inactive_effective_score_day is not None and d >= m.inactive_effective_score_day:
-                currently_inactive = True
-
-            day_score = daily.get(pid, {}).get(d)
-
-            if day_score is not None:
-                if currently_inactive:
-                    # Only a real participant submission reactivates and counts
-                    if day_score.participated:
-                        total += day_score.points
-                        currently_inactive = False
-                    # participated=False while inactive => skip day
-                else:
+            if active_map.get(d, False):
+                day_score = daily.get(pid, {}).get(d)
+                if day_score is not None:
                     total += day_score.points
-
             d += timedelta(days=1)
 
         results.append((pid, total))

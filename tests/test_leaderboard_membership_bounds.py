@@ -33,6 +33,7 @@ class TestLeaderboardMembershipBounds(unittest.TestCase):
 
         lb = build_leaderboard(
             memberships=memberships,
+            membership_events=[],
             daily=daily,
             from_day=date(2026, 3, 1),
             to_day=date(2026, 3, 4),
@@ -69,6 +70,7 @@ class TestLeaderboardMembershipBounds(unittest.TestCase):
 
         lb = build_leaderboard(
             memberships=memberships,
+            membership_events=[],
             daily=daily,
             from_day=date(2026, 3, 1),
             to_day=date(2026, 3, 5),

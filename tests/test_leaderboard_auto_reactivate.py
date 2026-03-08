@@ -2,7 +2,7 @@ import unittest
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-from gymchallenge.models import Membership
+from gymchallenge.models import Membership, MembershipEvent
 from gymchallenge.scoring_engine import DailyScore, build_leaderboard
 
 BERLIN = ZoneInfo("Europe/Berlin")
@@ -36,6 +36,7 @@ class TestLeaderboardAutoReactivate(unittest.TestCase):
 
         lb = build_leaderboard(
             memberships=memberships,
+            membership_events=[],
             daily=daily,
             from_day=date(2026, 3, 1),
             to_day=date(2026, 3, 7),
@@ -59,6 +60,28 @@ class TestLeaderboardAutoReactivate(unittest.TestCase):
                 inactive_effective_score_day=date(2026, 3, 6),
             )
         ]
+        membership_events = [
+            MembershipEvent(
+                event_id="evt1",
+                cycle_id="c1",
+                participant_id="p1",
+                event_type="auto_inactive",
+                effective_score_day=date(2026, 3, 6),
+                reason="4 consecutive missed days",
+                created_at=datetime.fromisoformat("2026-03-06T12:00:00+01:00"),
+                actor="system",
+            ),
+            MembershipEvent(
+                event_id="evt2",
+                cycle_id="c1",
+                participant_id="p1",
+                event_type="auto_reactivate_submission",
+                effective_score_day=date(2026, 3, 7),
+                reason="valid submission",
+                created_at=datetime.fromisoformat("2026-03-07T20:05:00+01:00"),
+                actor="system",
+            ),
+        ]
 
         daily = {
             "p1": {
@@ -74,6 +97,7 @@ class TestLeaderboardAutoReactivate(unittest.TestCase):
 
         lb = build_leaderboard(
             memberships=memberships,
+            membership_events=membership_events,
             daily=daily,
             from_day=date(2026, 3, 1),
             to_day=date(2026, 3, 7),

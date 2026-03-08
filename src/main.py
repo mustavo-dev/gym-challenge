@@ -7,7 +7,7 @@ from datetime import date, datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from gymchallenge.models import Submission, Correction, Membership
+from gymchallenge.models import Submission, Correction, Membership, MembershipEvent
 from gymchallenge.scoring_engine import compute_daily_scores, build_leaderboard, detect_auto_inactive, apply_auto_inactive, reactivate_member
 from gymchallenge.storage_json import load_list, save_list
 from gymchallenge.data_paths import data_path, exports_path
@@ -79,6 +79,22 @@ def load_memberships(rows: list[dict[str, Any]]) -> list[Membership]:
         )
     return out
 
+def load_membership_events(rows: list[dict[str, Any]]) -> list[MembershipEvent]:
+    out: list[MembershipEvent] = []
+    for r in rows:
+        out.append(
+            MembershipEvent(
+                event_id=r["event_id"],
+                cycle_id=r["cycle_id"],
+                participant_id=r["participant_id"],
+                event_type=r["event_type"],
+                effective_score_day=date.fromisoformat(r["effective_score_day"]),
+                reason=r["reason"],
+                created_at=datetime.fromisoformat(r["created_at"]),
+                actor=r["actor"],
+            )
+        )
+    return out
 
 def cmd_report(args: argparse.Namespace) -> int:
     from_day = parse_date(args.from_day)
@@ -86,6 +102,7 @@ def cmd_report(args: argparse.Namespace) -> int:
     include_inactive = args.include_inactive
 
     memberships = load_memberships(load_list(data_path("memberships.json")))
+    membership_events = load_membership_events(load_list(data_path("membership_events.json")))
     submissions = load_submissions(load_list(data_path("submissions.json")))
     corrections = load_corrections(load_list(data_path("corrections.json")))
 
@@ -106,6 +123,7 @@ def cmd_report(args: argparse.Namespace) -> int:
 
     leaderboard = build_leaderboard(
         memberships=memberships,
+        membership_events=membership_events,
         tz=BERLIN,
         daily=daily,
         from_day=from_day,
