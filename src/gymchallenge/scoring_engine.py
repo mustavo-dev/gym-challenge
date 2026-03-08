@@ -233,31 +233,41 @@ def build_leaderboard(
         join_sd = score_day_for_timestamp(m.joined_at, tz)
         start_day = max(from_day, join_sd if join_sd is not None else from_day)
 
-        # Compute membership end day (inclusive)
-        end_day = to_day
+        total = 0
 
-        # Inactive cutoff: exclude day D and beyond => last included is D-1
-        if m.inactive_effective_score_day is not None:
-            cutoff = m.inactive_effective_score_day - timedelta(days=1)
-            if cutoff < end_day:
-                end_day = cutoff
-
-        # Left cutoff: exclude left score-day and beyond => last included is left_sd-1
+        # If left_at exists, determine the first score day that should be excluded.
+        # Days on/after left_sd do not count.
+        left_sd = None
         if m.left_at is not None:
             left_sd = score_day_for_timestamp(m.left_at, tz)
-            if left_sd is not None:
-                cutoff = left_sd - timedelta(days=1)
-                if cutoff < end_day:
-                    end_day = cutoff
 
-        total = 0
-        if end_day >= start_day:
-            d = start_day
-            while d <= end_day:
-                day_score = daily.get(pid, {}).get(d)
-                if day_score is not None:
+        # Track whether the member is currently inactive.
+        # If inactive_effective_score_day exists, they become inactive starting on that day.
+        currently_inactive = False
+
+        d = start_day
+        while d <= to_day:
+            # Do not count days on/after left score day
+            if left_sd is not None and d >= left_sd:
+                break
+
+            # Enter inactive state on the effective day
+            if m.inactive_effective_score_day is not None and d >= m.inactive_effective_score_day:
+                currently_inactive = True
+
+            day_score = daily.get(pid, {}).get(d)
+
+            if day_score is not None:
+                if currently_inactive:
+                    # Only a real participant submission reactivates and counts
+                    if day_score.participated:
+                        total += day_score.points
+                        currently_inactive = False
+                    # participated=False while inactive => skip day
+                else:
                     total += day_score.points
-                d += timedelta(days=1)
+
+            d += timedelta(days=1)
 
         results.append((pid, total))
 
