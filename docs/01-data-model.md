@@ -72,6 +72,43 @@ Reactivation is represented by updating Membership fields (no separate event log
 * created\_at
 * admin (e.g., Jayme)
 
+## Membership Event History
+
+Participants may move between active and inactive states multiple times during a cycle.
+
+To preserve historical tracking, the system records **membership events**.
+
+These events allow the system to determine:
+
+- when a participant became inactive
+- whether inactivity was automatic or manual
+- when a participant resumed participation
+- who triggered the change (system or admin)
+
+### MembershipEvent
+
+Fields:
+
+- event_id
+- cycle_id
+- participant_id
+- event_type
+- effective_score_day
+- reason
+- created_at
+- actor
+
+### Event Types
+
+| Event Type | Description |
+|------------|-------------|
+| auto_inactive | Participant missed four consecutive days |
+| manual_inactive | Jayme manually deactivated participant |
+| manual_reactivate | Jayme manually reactivated participant |
+| auto_reactivate_submission | Participant became active again via valid submission |
+
+These events allow the system to reconstruct the **active/inactive timeline** of every participant.
+
 ## Derived Concepts
 
 ### Score Day

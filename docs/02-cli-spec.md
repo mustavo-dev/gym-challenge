@@ -19,6 +19,20 @@
 * member remove --cycle-id ... --name "Last, First"
 * member list --cycle-id ...
 
+### Membership State Changes
+
+Membership commands create historical events.
+
+Examples:
+
+membership deactivate
+membership reactivate
+
+These commands do not overwrite previous status information.
+Instead they create a **membership event** which becomes part of the participant's historical timeline.
+
+Automatic system actions (auto-inactive or auto-reactivation via submission) also create events.
+
 ## checkin
 
 * checkin record --cycle-id ... --name "Last, First" --points N \[--at "YYYY-MM-DDTHH:MM"]

@@ -24,6 +24,38 @@ Must support 3-month cycles, cycle restarts, and concurrent cycles.
 * Admin corrections allowed (Jayme), not advertised
 * Correction reason is required
 
+## Participation Status Tracking
+
+Participants can transition between active and inactive states during a cycle.
+
+A participant becomes **automatically inactive** after **four consecutive days with no submission**.
+
+Inactive participants:
+
+- remain visible in leaderboards (unless explicitly excluded)
+- stop accumulating score changes until they become active again
+
+### Reactivation
+
+A participant can become active again in two ways:
+
+1. **Automatic Reactivation**
+
+   - If an inactive participant submits a valid daily score, they are automatically reactivated.
+   - Reactivation is effective on the **same score day** as the valid submission.
+   - That day's score counts normally.
+
+2. **Manual Reactivation**
+
+   - Jayme may manually reactivate a participant through the CLI.
+   - This requires specifying an effective score day and reason.
+
+### Important Rule
+
+Administrative **corrections do not reactivate participants**.
+
+Only a valid participant submission or manual admin action can reactivate someone.
+
 ## Cycle rules
 
 * A cycle has: cycle\_id, start_score_day, end_score_day, timezone, status

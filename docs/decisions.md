@@ -16,3 +16,16 @@
 - auto-inactive becomes effective the day after the 4th consecutive miss (the 4th miss still gets -3)
 - Admin reactivate exists; reason required; if --effective-day is omitted, default is next score day
 - Valid participant submission auto-reactivates an auto-inactive member on the same score day; corrections do not reactivate.
+
+### Membership Status Tracking
+
+Participants may transition between active and inactive states multiple times within a cycle.
+
+To preserve a full history, the system records **membership events** rather than overwriting status fields.
+
+This allows Jayme to see:
+
+- why someone became inactive
+- whether inactivity was automatic or manual
+- when someone resumed participation
+- how many members were active at any point during the cycle
