@@ -20,7 +20,8 @@ from gymchallenge.membership_event_ops import append_membership_event
 from gymchallenge.system_event_ops import append_missing_auto_inactive_events, append_missing_auto_reactivate_events
 from gymchallenge.reactivation_ops import detect_auto_reactivate
 from gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_active_cycle, has_cycle_id
-from gymchallenge.cycle_timeline import cycle_status, cycle_overlaps_existing
+from gymchallenge.cycle_timeline import cycle_status, cycle_overlaps_existing, cycle_window_start, cycle_window_end
+from gymchallenge.cycle_store import find_cycle_row
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -588,6 +589,49 @@ def cmd_cycle_list(args: argparse.Namespace) -> int:
 
     return 0
 
+def cmd_cycle_show(args: argparse.Namespace) -> int:
+    cycle_id = args.cycle_id.strip()
+
+    cycle_rows = load_list(data_path("cycles.json"))
+    row = find_cycle_row(cycle_rows, cycle_id)
+
+    if row is None:
+        raise ValueError(f"cycle not found: {cycle_id}")
+
+    cycle = load_cycles([row])[0]
+    now = datetime.now(BERLIN)
+    status = cycle_status(cycle, now, BERLIN)
+    window_start = cycle_window_start(cycle, BERLIN)
+    window_end = cycle_window_end(cycle, BERLIN)
+
+    memberships_rows = load_list(data_path("memberships.json"))
+    submissions_rows = load_list(data_path("submissions.json"))
+    corrections_rows = load_list(data_path("corrections.json"))
+    membership_event_rows = load_list(data_path("membership_events.json"))
+
+    membership_count = sum(1 for r in memberships_rows if r.get("cycle_id") == cycle_id)
+    submission_count = sum(1 for r in submissions_rows if r.get("cycle_id") == cycle_id)
+    correction_count = sum(1 for r in corrections_rows if r.get("cycle_id") == cycle_id)
+    membership_event_count = sum(1 for r in membership_event_rows if r.get("cycle_id") == cycle_id)
+
+    print(f"Cycle: {cycle.cycle_id}")
+    print(f"Name: {cycle.name}")
+    print(f"Start Day: {cycle.start_day.isoformat()}")
+    print(f"End Day: {cycle.end_day.isoformat()}")
+    print(f"Status: {status}")
+    print()
+    print("Active Window:")
+    print(f"  Opens:  {window_start.isoformat()}")
+    print(f"  Closes: {window_end.isoformat()}")
+    print()
+    print("Counts:")
+    print(f"  Memberships: {membership_count}")
+    print(f"  Submissions: {submission_count}")
+    print(f"  Corrections: {correction_count}")
+    print(f"  Membership Events: {membership_event_count}")
+
+    return 0
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="gym-challenge")
 
@@ -622,6 +666,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     c_list = cycle_sub.add_parser("list", help="List cycles")
     c_list.set_defaults(func=cmd_cycle_list)
+
+    c_show = cycle_sub.add_parser("show", help="Show detailed information for a cycle")
+    c_show.add_argument("--cycle-id", required=True)
+    c_show.set_defaults(func=cmd_cycle_show)
 
     # participant commands
     p_participant = sub.add_parser("participant", help="Manage participants")
