@@ -47,3 +47,44 @@ def append_missing_auto_inactive_events(
         existing_rows.append(row)
 
     return written
+
+def append_missing_auto_reactivate_events(
+    path: str,
+    existing_rows: list[dict[str, Any]],
+    cycle_id: str,
+    updates: dict[str, date],
+    created_at: datetime,
+) -> list[dict[str, Any]]:
+    """
+    For each participant_id -> effective_score_day in updates,
+    append an auto_reactivate_submission event only if an identical event is not already present.
+    Returns the list of newly written event rows.
+    """
+    written: list[dict[str, Any]] = []
+
+    for participant_id, effective_day in updates.items():
+        effective_day_str = effective_day.isoformat()
+
+        if has_matching_event(
+            existing_rows,
+            cycle_id=cycle_id,
+            participant_id=participant_id,
+            event_type="auto_reactivate_submission",
+            effective_score_day=effective_day_str,
+        ):
+            continue
+
+        row = append_membership_event(
+            path=path,
+            cycle_id=cycle_id,
+            participant_id=participant_id,
+            event_type="auto_reactivate_submission",
+            effective_score_day=effective_day,
+            reason="Valid participant submission reactivated member",
+            created_at=created_at,
+            actor="system",
+        )
+        written.append(row)
+        existing_rows.append(row)
+
+    return written
