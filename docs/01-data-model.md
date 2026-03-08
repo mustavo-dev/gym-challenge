@@ -47,6 +47,10 @@ Reactivation is represented by updating Membership fields (no separate event log
   - inactive_reason remains as historical info (last known reason), or may be set to "manual" if preferred
   - inactive_effective_score_day = None
   - The reactivate command may specify an effective score day; if provided, the member is treated as active starting on that score day (otherwise defaults to next score day).
+- Auto-reactivation by submission (MVP):
+  - If a participant is inactive due to auto-inactive status and later makes a valid submission, the system treats them as active again starting on that same score day.
+  - The submission counts normally.
+  - Admin corrections do not trigger reactivation.
 
 ### Submission (raw event)
 

@@ -53,6 +53,9 @@ Must support 3-month cycles, cycle restarts, and concurrent cycles.
 * Admin can reactivate an inactive member in a cycle with:
   * required reason
   * optional effective score day (defaults to next score day if not provided)
+* A valid participant submission after auto-inactive status automatically reactivates the participant on that same score day.
+* That submission counts normally for that score day.
+* Admin corrections do not reactivate a participant.
 
 ## Persistence (v1)
 
