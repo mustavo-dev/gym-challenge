@@ -1,6 +1,6 @@
 import unittest
 
-from gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_active_cycle
+from gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_active_cycle, has_cycle_id
 
 
 class TestCycleOps(unittest.TestCase):
@@ -24,6 +24,13 @@ class TestCycleOps(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_cycle_id("monsoon", 2026)
 
+    def test_has_cycle_id(self):
+        rows = [
+            {"cycle_id": "fall26", "active": True},
+            {"cycle_id": "spring27", "active": False},
+        ]
+        self.assertTrue(has_cycle_id(rows, "fall26"))
+        self.assertFalse(has_cycle_id(rows, "summer26"))
 
 if __name__ == "__main__":
     unittest.main()

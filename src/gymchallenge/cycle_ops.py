@@ -31,3 +31,9 @@ def has_active_cycle(rows: list[dict[str, Any]]) -> bool:
         if r.get("active") is True:
             return True
     return False
+
+def has_cycle_id(rows: list[dict[str, Any]], cycle_id: str) -> bool:
+    for r in rows:
+        if r.get("cycle_id") == cycle_id:
+            return True
+    return False

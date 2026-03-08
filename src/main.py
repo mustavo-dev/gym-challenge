@@ -19,6 +19,7 @@ from gymchallenge.membership_store import find_membership_index
 from gymchallenge.membership_event_ops import append_membership_event
 from gymchallenge.system_event_ops import append_missing_auto_inactive_events, append_missing_auto_reactivate_events
 from gymchallenge.reactivation_ops import detect_auto_reactivate
+from gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_active_cycle, has_cycle_id
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -506,6 +507,40 @@ def cmd_system_apply_auto_reactivate(args: argparse.Namespace) -> int:
     )
     return 0
 
+def cmd_cycle_create(args: argparse.Namespace) -> int:
+    season = args.season.strip()
+    year = int(args.year)
+    start_day = date.fromisoformat(args.start_day)
+    end_day = date.fromisoformat(args.end_day)
+
+    if end_day < start_day:
+        raise ValueError("end must be on or after start")
+
+    path = data_path("cycles.json")
+    rows = load_list(path)
+
+    if has_active_cycle(rows):
+        raise ValueError("cannot create a new active cycle while another active cycle exists")
+
+    cycle_id = build_cycle_id(season, year)
+    name = build_cycle_name(season, year)
+
+    if has_cycle_id(rows, cycle_id):
+        raise ValueError(f"cycle already exists: {cycle_id}")
+
+    row = {
+        "cycle_id": cycle_id,
+        "name": name,
+        "start_day": start_day.isoformat(),
+        "end_day": end_day.isoformat(),
+        "created_at": datetime.now(BERLIN).isoformat(),
+        "active": True,
+    }
+
+    append_row(path, row)
+    print(f"Created cycle: {cycle_id} ({name}) {start_day.isoformat()}..{end_day.isoformat()}")
+    return 0
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="gym-challenge")
 
@@ -526,6 +561,17 @@ def build_parser() -> argparse.ArgumentParser:
     s_reactivate.add_argument("--from", dest="from_day", required=True, help="YYYY-MM-DD")
     s_reactivate.add_argument("--to", dest="to_day", required=True, help="YYYY-MM-DD")
     s_reactivate.set_defaults(func=cmd_system_apply_auto_reactivate)
+
+    # cycle commands
+    p_cycle = sub.add_parser("cycle", help="Manage challenge cycles")
+    cycle_sub = p_cycle.add_subparsers(dest="cycle_cmd", required=True)
+
+    c_create = cycle_sub.add_parser("create", help="Create a new cycle")
+    c_create.add_argument("--season", required=True, help="spring|summer|fall|winter")
+    c_create.add_argument("--year", required=True, help="YYYY")
+    c_create.add_argument("--start", dest="start_day", required=True, help="YYYY-MM-DD")
+    c_create.add_argument("--end", dest="end_day", required=True, help="YYYY-MM-DD")
+    c_create.set_defaults(func=cmd_cycle_create)
 
     # participant commands
     p_participant = sub.add_parser("participant", help="Manage participants")
