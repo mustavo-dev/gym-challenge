@@ -15,6 +15,7 @@ from gymchallenge.storage_ops import append_row
 from gymchallenge.membership_ops import has_membership
 from gymchallenge.id_ops import new_submission_id, new_correction_id
 from gymchallenge.membership_store import find_membership_index
+from gymchallenge.membership_event_ops import append_membership_event
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -259,6 +260,17 @@ def cmd_membership_reactivate(args: argparse.Namespace) -> int:
 
     save_list(path, rows)
 
+    append_membership_event(
+        path=data_path("membership_events.json"),
+        cycle_id=cycle_id,
+        participant_id=participant_id,
+        event_type="manual_reactivate",
+        effective_score_day=effective_day,
+        reason=reason,
+        created_at=datetime.now(BERLIN),
+        actor="jayme",
+    )
+
     print(f"Reactivated membership: cycle={cycle_id} participant={participant_id} effective_day={effective_day.isoformat()}")
     return 0
 
@@ -283,6 +295,17 @@ def cmd_membership_deactivate(args: argparse.Namespace) -> int:
     rows[idx]["inactive_effective_score_day"] = effective_day.isoformat()
 
     save_list(path, rows)
+
+    append_membership_event(
+        path=data_path("membership_events.json"),
+        cycle_id=cycle_id,
+        participant_id=participant_id,
+        event_type="manual_inactive",
+        effective_score_day=effective_day,
+        reason=reason,
+        created_at=datetime.now(BERLIN),
+        actor="jayme",
+    )
 
     print(f"Deactivated membership: cycle={cycle_id} participant={participant_id} effective_day={effective_day.isoformat()}")
     return 0
