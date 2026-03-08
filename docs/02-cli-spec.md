@@ -12,8 +12,31 @@
 - A cycle cannot be created if its active window overlaps an existing cycle's active window
 - Only one cycle may be active at a time
 
-Future planned CLI commands may include:
-- `cycle show`
+### cycle show
+
+Displays detailed information about a specific cycle.
+
+Example:
+
+python3 src/main.py cycle show --cycle-id fall26
+
+Output includes:
+
+- cycle_id
+- name
+- start_day
+- end_day
+- derived cycle status (planned | active | closed)
+- cycle active window
+- summary counts (participants, submissions, events)
+
+This command is intended for administrative inspection and debugging.
+
+### Future CLI Commands
+
+The following commands are planned for later implementation:
+
+- `cycle show --cycle-id <id>`
 
 ## participant
 
