@@ -58,7 +58,7 @@ Only a valid participant submission or manual admin action can reactivate someon
 
 ## Cycle rules
 
-* A cycle has: cycle\_id, start_score_day, end_score_day, timezone, status
+* A cycle has: cycle\_id, start\_score\_day, end\_score\_day, timezone, status
 * Cycles may run:
 
   * sequentially (restart every ~3 months)
@@ -83,11 +83,11 @@ Only a valid participant submission or manual admin action can reactivate someon
 * 4 Consecutive missed score days → auto-inactive in that cycle
 * Auto-inactive is based on participant submissions, not corrections
 * Admin can reactivate an inactive member in a cycle with:
+
   * required reason
   * optional effective score day (defaults to next score day if not provided)
-* A valid participant submission after auto-inactive status automatically reactivates the participant on that same score day.
-* That submission counts normally for that score day.
-* Admin corrections do not reactivate a participant.
+
+* If valid submission is added after participant becomes automatically inactive they will automatically be reactivated for doing the correct thing
 
 ## Persistence (v1)
 
