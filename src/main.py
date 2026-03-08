@@ -7,7 +7,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from gymchallenge.models import Submission, Correction, Membership
-from gymchallenge.scoring_engine import compute_daily_scores, build_leaderboard
+from gymchallenge.scoring_engine import compute_daily_scores, build_leaderboard, detect_auto_inactive, apply_auto_inactive
 from gymchallenge.storage_json import load_list, save_list
 from gymchallenge.data_paths import data_path, exports_path
 from gymchallenge.participant_ops import generate_participant_id
@@ -16,6 +16,7 @@ from gymchallenge.membership_ops import has_membership
 from gymchallenge.id_ops import new_submission_id, new_correction_id
 from gymchallenge.membership_store import find_membership_index
 from gymchallenge.membership_event_ops import append_membership_event
+from gymchallenge.system_event_ops import append_missing_auto_inactive_events
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -310,10 +311,104 @@ def cmd_membership_deactivate(args: argparse.Namespace) -> int:
     print(f"Deactivated membership: cycle={cycle_id} participant={participant_id} effective_day={effective_day.isoformat()}")
     return 0
 
+def cmd_system_apply_auto_inactive(args: argparse.Namespace) -> int:
+    cycle_id = args.cycle_id.strip()
+    from_day = date.fromisoformat(args.from_day)
+    to_day = date.fromisoformat(args.to_day)
+
+    memberships_path = data_path("memberships.json")
+    events_path = data_path("membership_events.json")
+
+    membership_rows = load_list(memberships_path)
+    submissions = load_submissions(load_list(data_path("submissions.json")))
+    corrections = load_corrections(load_list(data_path("corrections.json")))
+    existing_event_rows = load_list(events_path)
+
+    memberships = load_memberships(membership_rows)
+
+    # Only operate on memberships for the requested cycle
+    cycle_memberships = [m for m in memberships if m.cycle_id == cycle_id]
+    participant_ids = sorted({m.participant_id for m in cycle_memberships})
+
+    daily = compute_daily_scores(
+        participant_ids=participant_ids,
+        submissions=submissions,
+        tz=BERLIN,
+        cycle_start=from_day,
+        cycle_end=to_day,
+        missing_points=-3,
+        corrections=corrections,
+    )
+
+    updates = detect_auto_inactive(
+        daily=daily,
+        cycle_start=from_day,
+        cycle_end=to_day,
+        streak_required=4,
+    )
+
+    if not updates:
+        print(f"No auto-inactive updates for cycle={cycle_id}")
+        return 0
+
+    updated_cycle_memberships = apply_auto_inactive(cycle_memberships, updates)
+
+    # Merge updated cycle memberships back into the full membership list
+    updated_by_key = {(m.cycle_id, m.participant_id): m for m in updated_cycle_memberships}
+
+    new_membership_rows = []
+    for row in membership_rows:
+        key = (row["cycle_id"], row["participant_id"])
+        if key in updated_by_key:
+            m = updated_by_key[key]
+            new_membership_rows.append(
+                {
+                    "cycle_id": m.cycle_id,
+                    "participant_id": m.participant_id,
+                    "active_in_cycle": m.active_in_cycle,
+                    "joined_at": m.joined_at.isoformat(),
+                    "left_at": m.left_at.isoformat() if m.left_at else None,
+                    "inactive_reason": m.inactive_reason,
+                    "inactive_effective_score_day": (
+                        m.inactive_effective_score_day.isoformat()
+                        if m.inactive_effective_score_day
+                        else None
+                    ),
+                }
+            )
+        else:
+            new_membership_rows.append(row)
+
+    save_list(memberships_path, new_membership_rows)
+
+    written = append_missing_auto_inactive_events(
+        path=events_path,
+        existing_rows=existing_event_rows,
+        cycle_id=cycle_id,
+        updates=updates,
+        created_at=datetime.now(BERLIN),
+    )
+
+    print(
+        f"Applied auto-inactive for cycle={cycle_id}: "
+        f"{len(updates)} membership update(s), {len(written)} new event(s)"
+    )
+    return 0
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="gym-challenge")
 
     sub = parser.add_subparsers(dest="cmd", required=True)
+
+    # system commands
+    p_system = sub.add_parser("system", help="System maintenance commands")
+    system_sub = p_system.add_subparsers(dest="system_cmd", required=True)
+
+    s_auto = system_sub.add_parser("apply-auto-inactive", help="Detect and apply auto-inactive updates")
+    s_auto.add_argument("--cycle-id", required=True)
+    s_auto.add_argument("--from", dest="from_day", required=True, help="YYYY-MM-DD")
+    s_auto.add_argument("--to", dest="to_day", required=True, help="YYYY-MM-DD")
+    s_auto.set_defaults(func=cmd_system_apply_auto_inactive)
 
     # participant commands
     p_participant = sub.add_parser("participant", help="Manage participants")
