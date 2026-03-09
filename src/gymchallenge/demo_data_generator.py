@@ -43,7 +43,7 @@ def generate_demo_participants(count: int, seed: int) -> list[dict]:
                 "participant_id": participant_id,
                 "first_name": first,
                 "last_name": last,
-                "created_at": datetime(2026, 1, 1, 12, 0, 0).isoformat(),
+                "created_at": datetime(2026, 1, 1, 12, 0, 0, tzinfo=ZoneInfo("Europe/Berlin")).isoformat(),
                 "active": True,
             }
         )
@@ -63,7 +63,7 @@ def generate_demo_memberships(
                 "cycle_id": cycle_id,
                 "participant_id": p["participant_id"],
                 "active_in_cycle": True,
-                "joined_at": datetime(2026, 1, 1, 12, 0, 0).isoformat(),
+                "joined_at": datetime(2026, 1, 1, 12, 0, 0, tzinfo=ZoneInfo("Europe/Berlin")).isoformat(),
                 "left_at": None,
                 "inactive_reason": None,
                 "inactive_effective_score_day": None,

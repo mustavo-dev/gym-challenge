@@ -23,6 +23,7 @@ from gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_active_
 from gymchallenge.cycle_timeline import cycle_status, cycle_overlaps_existing, cycle_window_start, cycle_window_end
 from gymchallenge.cycle_store import find_cycle_row
 from gymchallenge.display_names import build_display_name_map
+from gymchallenge.demo_data_generator import generate_demo_participants, generate_demo_memberships, generate_demo_submissions
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -637,6 +638,54 @@ def cmd_cycle_show(args: argparse.Namespace) -> int:
 
     return 0
 
+def cmd_system_generate_demo_data(args: argparse.Namespace) -> int:
+    cycle_id = args.cycle_id
+    participant_count = args.participants
+    seed = args.seed
+    miss_rate = args.miss_rate
+
+    from_day = date.fromisoformat(args.from_day)
+    to_day = date.fromisoformat(args.to_day)
+
+    tz = BERLIN
+
+    print("Generating demo dataset...")
+    print(f"Participants: {participant_count}")
+    print(f"Cycle: {cycle_id}")
+    print(f"Range: {from_day} .. {to_day}")
+    print(f"Seed: {seed}")
+
+    participants = generate_demo_participants(
+        count=participant_count,
+        seed=seed,
+    )
+
+    memberships = generate_demo_memberships(
+        cycle_id=cycle_id,
+        participant_rows=participants,
+    )
+
+    submissions = generate_demo_submissions(
+        cycle_id=cycle_id,
+        participant_rows=participants,
+        from_day=from_day,
+        to_day=to_day,
+        seed=seed,
+        miss_rate=miss_rate,
+        tz=tz,
+    )
+
+    save_list(data_path("participants.json"), participants)
+    save_list(data_path("memberships.json"), memberships)
+    save_list(data_path("submissions.json"), submissions)
+
+    print("Demo dataset written.")
+    print(f"participants: {len(participants)}")
+    print(f"memberships: {len(memberships)}")
+    print(f"submissions: {len(submissions)}")
+
+    return 0
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="gym-challenge")
 
@@ -657,6 +706,20 @@ def build_parser() -> argparse.ArgumentParser:
     s_reactivate.add_argument("--from", dest="from_day", required=True, help="YYYY-MM-DD")
     s_reactivate.add_argument("--to", dest="to_day", required=True, help="YYYY-MM-DD")
     s_reactivate.set_defaults(func=cmd_system_apply_auto_reactivate)
+
+    s_demo = system_sub.add_parser(
+        "generate-demo-data",
+        help="Generate deterministic demo dataset",
+    )
+
+    s_demo.add_argument("--cycle-id", required=True)
+    s_demo.add_argument("--participants", type=int, default=30)
+    s_demo.add_argument("--from-day", required=True)
+    s_demo.add_argument("--to-day", required=True)
+    s_demo.add_argument("--seed", type=int, default=42)
+    s_demo.add_argument("--miss-rate", type=float, default=0.2)
+
+    s_demo.set_defaults(func=cmd_system_generate_demo_data)
 
     # cycle commands
     p_cycle = sub.add_parser("cycle", help="Manage challenge cycles")
