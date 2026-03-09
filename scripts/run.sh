@@ -9,8 +9,6 @@ fi
 # shellcheck disable=SC1091
 source .venv/bin/activate
 
-python3 -m pip install --upgrade pip >/dev/null
-
 cmd="${1:-run}"
 case "$cmd" in
   run)
