@@ -675,6 +675,13 @@ def cmd_system_generate_demo_data(args: argparse.Namespace) -> int:
         tz=tz,
     )
 
+    # Reset demo-owned data files so each run starts clean
+    save_list(data_path("participants.json"), [])
+    save_list(data_path("memberships.json"), [])
+    save_list(data_path("submissions.json"), [])
+    save_list(data_path("corrections.json"), [])
+    save_list(data_path("membership_events.json"), [])
+
     save_list(data_path("participants.json"), participants)
     save_list(data_path("memberships.json"), memberships)
     save_list(data_path("submissions.json"), submissions)
@@ -683,6 +690,8 @@ def cmd_system_generate_demo_data(args: argparse.Namespace) -> int:
     print(f"participants: {len(participants)}")
     print(f"memberships: {len(memberships)}")
     print(f"submissions: {len(submissions)}")
+    print("corrections: 0")
+    print("membership_events: 0")
 
     return 0
 
