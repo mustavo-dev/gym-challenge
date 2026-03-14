@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any
 
-from .models import Membership, Cycle, Submission
+from .models import Membership, Cycle, Submission, Correction
 
 
 def load_memberships(rows: list[dict[str, Any]]) -> list[Membership]:
@@ -50,6 +50,23 @@ def load_submissions(rows: list[dict[str, Any]]) -> list[Submission]:
                 submitted_at=datetime.fromisoformat(r["submitted_at"]),
                 points=int(r["points"]),
                 source=r.get("source", "manual"),
+            )
+        )
+    return out
+
+def load_corrections(rows: list[dict[str, Any]]) -> list[Correction]:
+    out: list[Correction] = []
+    for r in rows:
+        out.append(
+            Correction(
+                correction_id=r["correction_id"],
+                cycle_id=r["cycle_id"],
+                participant_id=r["participant_id"],
+                score_day=date.fromisoformat(r["score_day"]),
+                new_points=int(r["new_points"]),
+                reason=r["reason"],
+                created_at=datetime.fromisoformat(r["created_at"]),
+                admin=r.get("admin", "admin"),
             )
         )
     return out
