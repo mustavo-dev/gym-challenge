@@ -1,0 +1,8 @@
+"""Local runner for the gym-challenge UI."""
+
+from src.ui.app import create_app
+
+app = create_app()
+
+if __name__ == "__main__":
+    app.run(debug=True)
