@@ -1,6 +1,7 @@
 """Admin-facing UI routes."""
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request, redirect, url_for
+
 from src.ui.services.participant_admin_service import get_participants_for_list
 from src.ui.services.membership_ui_service import get_memberships_for_list
 from src.ui.services.cycle_ui_service import get_cycles_for_list
@@ -23,13 +24,47 @@ def admin_dashboard():
     )
 
 
-@admin_bp.get("/admin/participants")
+@admin_bp.route("/admin/participants", methods=["GET", "POST"])
 def participants_page():
-    """Render the admin participant list page."""
+    if request.method == "POST":
+        first = request.form.get("first_name", "").strip()
+        last = request.form.get("last_name", "").strip()
+
+        if first and last:
+            from src.gymchallenge.participant_ops import generate_participant_id
+            from src.gymchallenge.storage_ops import append_row
+            from src.gymchallenge.storage_json import load_list
+            from src.gymchallenge.data_paths import data_path
+            from datetime import datetime
+            from zoneinfo import ZoneInfo
+
+            BERLIN = ZoneInfo("Europe/Berlin")
+
+            path = data_path("participants.json")
+            existing = load_list(path)
+
+            participant_id = generate_participant_id(
+                first=first,
+                last=last,
+                existing_rows=existing,
+            )
+
+            row = {
+                "participant_id": participant_id,
+                "first_name": first,
+                "last_name": last,
+                "created_at": datetime.now(BERLIN).isoformat(),
+                "active": True,
+            }
+
+            append_row(path, row)
+
+        return redirect(url_for("admin.participants_page"))
+
     participants = get_participants_for_list()
+
     return render_template(
         "admin/participants.html",
-        page_title="Participants",
         participants=participants,
     )
 
