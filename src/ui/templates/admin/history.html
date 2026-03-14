@@ -6,6 +6,24 @@
 
 <h2>History</h2>
 
-<p>History management will appear here.</p>
+<p>Total history entries: {{ total }}</p>
+
+{% if history_items %}
+  <ul>
+    {% for item in history_items %}
+      <li>
+        <strong>{{ item.display_name }}</strong><br>
+        Type: {{ item.entry_type }}<br>
+        Event: {{ item.event_label }}<br>
+        Date: {{ item.date_label }}<br>
+        {{ item.detail_1 }}<br>
+        {{ item.detail_2 }}<br>
+        {{ item.detail_3 }}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No history entries found.</p>
+{% endif %}
 
 {% endblock %}

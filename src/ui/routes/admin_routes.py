@@ -6,6 +6,7 @@ from src.ui.services.membership_ui_service import get_memberships_for_list
 from src.ui.services.cycle_ui_service import get_cycles_for_list
 from src.ui.services.submission_ui_service import get_submissions_for_list
 from src.ui.services.correction_ui_service import get_corrections_for_list
+from src.ui.services.history_ui_service import get_history_for_list
 
 admin_bp = Blueprint(
     "admin",
@@ -97,7 +98,11 @@ def system_page():
 
 @admin_bp.get("/admin/history")
 def history_page():
+    """Render the admin history page."""
+    history_items = get_history_for_list()
     return render_template(
         "admin/history.html",
         page_title="History",
+        history_items=history_items,
+        total=len(history_items),
     )
