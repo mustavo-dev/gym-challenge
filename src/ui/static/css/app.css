@@ -1,1 +1,26 @@
 /* Shared UI styles for gym-challenge */
+.admin-two-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.admin-panel {
+  padding: 1rem;
+  border: 1px solid #ccc;
+}
+
+@media (min-width: 900px) {
+  .admin-two-panel {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .admin-panel-left {
+    flex: 2;
+  }
+
+  .admin-panel-right {
+    flex: 1;
+  }
+}

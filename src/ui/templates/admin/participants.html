@@ -8,6 +8,10 @@
 
 <p>Total participants: {{ participants|length }}</p>
 
+{% include "admin/partials/two_panel_start.html" %}
+
+<h3>Current Participants</h3>
+
 {% if participants %}
   <ul>
     {% for participant in participants %}
@@ -22,5 +26,13 @@
 {% else %}
   <p>No participants found.</p>
 {% endif %}
+
+{% include "admin/partials/two_panel_switch.html" %}
+
+<h3>Add Participant</h3>
+
+<p>Participant creation form will appear here in the next block.</p>
+
+{% include "admin/partials/two_panel_end.html" %}
 
 {% endblock %}
