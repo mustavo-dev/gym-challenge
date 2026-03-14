@@ -4,6 +4,7 @@ from flask import Blueprint, render_template
 from src.ui.services.participant_admin_service import get_participants_for_list
 from src.ui.services.membership_ui_service import get_memberships_for_list
 from src.ui.services.cycle_ui_service import get_cycles_for_list
+from src.ui.services.submission_ui_service import get_submissions_for_list
 
 admin_bp = Blueprint(
     "admin",
@@ -44,9 +45,13 @@ def memberships_page():
 
 @admin_bp.get("/admin/submissions")
 def submissions_page():
+    """Render the admin submissions page."""
+    submissions = get_submissions_for_list()
     return render_template(
         "admin/submissions.html",
         page_title="Submissions",
+        submissions=submissions,
+        total=len(submissions),
     )
 
 

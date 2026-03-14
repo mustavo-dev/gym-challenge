@@ -6,6 +6,23 @@
 
 <h2>Submissions</h2>
 
-<p>Submission management will appear here.</p>
+<p>Total submissions: {{ total }}</p>
+
+{% if submissions %}
+  <ul>
+    {% for s in submissions %}
+      <li>
+        <strong>{{ s.display_name }}</strong><br>
+        Cycle: {{ s.cycle_id }}<br>
+        Participant ID: {{ s.participant_id }}<br>
+        Submitted: {{ s.submitted_display }}<br>
+        Points: {{ s.points }}<br>
+        Source: {{ s.source }}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No submissions found.</p>
+{% endif %}
 
 {% endblock %}
