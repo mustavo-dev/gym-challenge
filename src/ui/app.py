@@ -3,6 +3,7 @@
 from flask import Flask, render_template
 
 from src.ui.routes.participant_routes import participant_bp
+from src.ui.routes.admin_routes import admin_bp
 
 
 def create_app() -> Flask:
@@ -10,6 +11,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
 
     app.register_blueprint(participant_bp)
+    app.register_blueprint(admin_bp)
 
     @app.get("/")
     def home() -> str:
