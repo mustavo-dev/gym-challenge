@@ -34,7 +34,7 @@ def get_corrections_for_list() -> list[dict[str, Any]]:
                 "new_points": correction.new_points,
                 "reason": correction.reason,
                 "created_display": correction.created_at.isoformat(sep=" ", timespec="minutes"),
-                "admin": correction.admin,
+                "admin_display": correction.admin.title(),
             }
         )
 
