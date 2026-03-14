@@ -24,6 +24,7 @@ from gymchallenge.cycle_timeline import cycle_status, cycle_overlaps_existing, c
 from gymchallenge.cycle_store import find_cycle_row
 from gymchallenge.display_names import build_display_name_map
 from gymchallenge.demo_data_generator import generate_demo_participants, generate_demo_memberships, generate_demo_submissions
+from gymchallenge.loaders import load_memberships
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -61,25 +62,6 @@ def load_corrections(rows: list[dict[str, Any]]) -> list[Correction]:
                 reason=r["reason"],
                 created_at=datetime.fromisoformat(r["created_at"]),
                 admin=r.get("admin", "admin"),
-            )
-        )
-    return out
-
-
-def load_memberships(rows: list[dict[str, Any]]) -> list[Membership]:
-    out: list[Membership] = []
-    for r in rows:
-        out.append(
-            Membership(
-                cycle_id=r["cycle_id"],
-                participant_id=r["participant_id"],
-                active_in_cycle=bool(r["active_in_cycle"]),
-                joined_at=datetime.fromisoformat(r["joined_at"]),
-                left_at=datetime.fromisoformat(r["left_at"]) if r.get("left_at") else None,
-                inactive_reason=r.get("inactive_reason"),
-                inactive_effective_score_day=date.fromisoformat(r["inactive_effective_score_day"])
-                if r.get("inactive_effective_score_day")
-                else None,
             )
         )
     return out
