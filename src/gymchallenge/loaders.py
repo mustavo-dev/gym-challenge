@@ -22,6 +22,7 @@ def load_memberships(rows: list[dict[str, Any]]) -> list[Membership]:
                 else None,
             )
         )
+    return out
 
 def load_cycles(rows: list[dict[str, Any]]) -> list[Cycle]:
     out: list[Cycle] = []
@@ -36,6 +37,7 @@ def load_cycles(rows: list[dict[str, Any]]) -> list[Cycle]:
                 active=bool(r.get("active", True)),
             )
         )
+    return out
 
 def load_submissions(rows: list[dict[str, Any]]) -> list[Submission]:
     out: list[Submission] = []
