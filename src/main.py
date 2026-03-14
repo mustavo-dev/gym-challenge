@@ -24,29 +24,13 @@ from gymchallenge.cycle_timeline import cycle_status, cycle_overlaps_existing, c
 from gymchallenge.cycle_store import find_cycle_row
 from gymchallenge.display_names import build_display_name_map
 from gymchallenge.demo_data_generator import generate_demo_participants, generate_demo_memberships, generate_demo_submissions
-from gymchallenge.loaders import load_memberships, load_cycles
+from gymchallenge.loaders import load_memberships, load_cycles, load_submissions
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
 
 def parse_date(s: str) -> date:
     return date.fromisoformat(s)
-
-
-def load_submissions(rows: list[dict[str, Any]]) -> list[Submission]:
-    out: list[Submission] = []
-    for r in rows:
-        out.append(
-            Submission(
-                submission_id=r["submission_id"],
-                cycle_id=r["cycle_id"],
-                participant_id=r["participant_id"],
-                submitted_at=datetime.fromisoformat(r["submitted_at"]),
-                points=int(r["points"]),
-                source=r.get("source", "manual"),
-            )
-        )
-    return out
 
 
 def load_corrections(rows: list[dict[str, Any]]) -> list[Correction]:
