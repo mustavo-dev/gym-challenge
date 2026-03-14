@@ -6,6 +6,23 @@
 
 <h2>Participants</h2>
 
-<p>Participant management will appear here.</p>
+<p>Total participants: {{ participants|length }}</p>
+
+{% if participants %}
+  <ul>
+    {% for participant in participants %}
+      <li>
+        <strong>{{ participant.display_name }}</strong><br>
+        ID: {{ participant.participant_id }}<br>
+        First: {{ participant.first_name }}<br>
+        Last: {{ participant.last_name }}<br>
+        Active: {{ participant.active }}<br>
+        Created: {{ participant.created_at }}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No participants found.</p>
+{% endif %}
 
 {% endblock %}

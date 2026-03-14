@@ -1,6 +1,7 @@
 """Admin-facing UI routes."""
 
 from flask import Blueprint, render_template
+from src.ui.services.participant_admin_service import get_participants_for_list
 
 admin_bp = Blueprint(
     "admin",
@@ -19,9 +20,12 @@ def admin_dashboard():
 
 @admin_bp.get("/admin/participants")
 def participants_page():
+    """Render the admin participant list page."""
+    participants = get_participants_for_list()
     return render_template(
         "admin/participants.html",
         page_title="Participants",
+        participants=participants,
     )
 
 
