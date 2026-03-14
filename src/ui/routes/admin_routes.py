@@ -5,6 +5,7 @@ from src.ui.services.participant_admin_service import get_participants_for_list
 from src.ui.services.membership_ui_service import get_memberships_for_list
 from src.ui.services.cycle_ui_service import get_cycles_for_list
 from src.ui.services.submission_ui_service import get_submissions_for_list
+from src.ui.services.correction_ui_service import get_corrections_for_list
 
 admin_bp = Blueprint(
     "admin",
@@ -57,9 +58,13 @@ def submissions_page():
 
 @admin_bp.get("/admin/corrections")
 def corrections_page():
+    """Render the admin corrections page."""
+    corrections = get_corrections_for_list()
     return render_template(
         "admin/corrections.html",
         page_title="Corrections",
+        corrections=corrections,
+        total=len(corrections),
     )
 
 

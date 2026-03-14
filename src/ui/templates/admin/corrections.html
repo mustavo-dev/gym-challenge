@@ -6,6 +6,23 @@
 
 <h2>Corrections</h2>
 
-<p>Correction management will appear here.</p>
+<p>Total corrections: {{ total }}</p>
+
+{% if corrections %}
+  <ul>
+    {% for c in corrections %}
+      <li>
+        <strong>{{ c.display_name }}</strong><br>
+        Score Day: {{ c.score_day }}<br>
+        New Points: {{ c.new_points }}<br>
+        Reason: {{ c.reason }}<br>
+        Created: {{ c.created_display }}<br>
+        Admin: {{ c.admin }}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No corrections found.</p>
+{% endif %}
 
 {% endblock %}
