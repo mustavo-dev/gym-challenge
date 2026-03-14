@@ -31,7 +31,23 @@
 
 <h3>Add Participant</h3>
 
-<p>Participant creation form will appear here in the next block.</p>
+<form method="post" action="#">
+  <div>
+    <label for="first_name">First Name</label><br>
+    <input id="first_name" name="first_name" type="text">
+  </div>
+
+  <div>
+    <label for="last_name">Last Name</label><br>
+    <input id="last_name" name="last_name" type="text">
+  </div>
+
+  <div>
+    <button type="submit">Add Participant</button>
+  </div>
+</form>
+
+<p>This form will be connected in the next block.</p>
 
 {% include "admin/partials/two_panel_end.html" %}
 
