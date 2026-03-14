@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Submit Daily Score</h2>
+
+<form>
+  <div>
+    <label for="participant">Participant</label>
+    <select id="participant" name="participant">
+      <option>Participant list will appear here later</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="points">Daily Score</label>
+    <select id="points" name="points">
+      <option>-3</option>
+      <option>-2</option>
+      <option>-1</option>
+      <option>0</option>
+      <option>1</option>
+      <option>2</option>
+      <option>3</option>
+      <option>4</option>
+      <option>5</option>
+    </select>
+  </div>
+
+  <button type="submit">Submit Score</button>
+</form>
+
+<hr>
+
+<section>
+  <h3>Scoring Rules</h3>
+
+  <p>
+    Daily participation is recorded during the challenge scoring window.
+  </p>
+
+  <ul>
+    <li>Score day opens at 20:00</li>
+    <li>Score day closes at 12:00 the following day</li>
+    <li>Missing a valid submission results in the missed-day penalty</li>
+    <li>Duplicate submissions are not allowed</li>
+  </ul>
+
+  <p>
+    Your submission timestamp will be recorded automatically.
+  </p>
+</section>
+
+{% endblock %}

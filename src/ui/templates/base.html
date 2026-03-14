@@ -6,10 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ page_title or "gym-challenge UI" }}</title>
   </head>
+
   <body>
+
+    <header>
+      <h1>gym-challenge</h1>
+    </header>
+
     <main>
-      <h1>gym-challenge UI</h1>
-      <p>Base template is rendering correctly.</p>
+      {% block content %}{% endblock %}
     </main>
+
   </body>
 </html>
