@@ -2,6 +2,7 @@
 
 from flask import Blueprint, render_template
 from src.ui.services.participant_admin_service import get_participants_for_list
+from src.ui.services.membership_ui_service import get_memberships_for_list
 
 admin_bp = Blueprint(
     "admin",
@@ -31,9 +32,12 @@ def participants_page():
 
 @admin_bp.get("/admin/memberships")
 def memberships_page():
+    """Render the admin memberships page."""
+    memberships = get_memberships_for_list()
     return render_template(
         "admin/memberships.html",
         page_title="Memberships",
+        memberships=memberships,
     )
 
 

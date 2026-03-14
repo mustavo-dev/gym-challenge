@@ -6,6 +6,25 @@
 
 <h2>Memberships</h2>
 
-<p>Membership management will appear here.</p>
+<p>Total memberships: {{ memberships|length }}</p>
+
+{% if memberships %}
+  <ul>
+    {% for membership in memberships %}
+      <li>
+        <strong>{{ membership.display_name }}</strong><br>
+        Cycle: {{ membership.cycle_id }}<br>
+        Participant ID: {{ membership.participant_id }}<br>
+        Status: {{ membership.status_label }}<br>
+        Joined: {{ membership.joined_display }}<br>
+        Left: {{ membership.left_display or "—" }}<br>
+        Inactive Reason: {{ membership.inactive_reason or "—" }}<br>
+        Inactive Effective Score Day: {{ membership.inactive_effective_score_day or "—" }}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No memberships found.</p>
+{% endif %}
 
 {% endblock %}
