@@ -12,12 +12,13 @@
   <ul>
     {% for s in submissions %}
       <li>
-        <strong>{{ s.display_name }}</strong><br>
-        Cycle: {{ s.cycle_id }}<br>
-        Participant ID: {{ s.participant_id }}<br>
-        Submitted: {{ s.submitted_display }}<br>
-        Points: {{ s.points }}<br>
-        Source: {{ s.source }}
+        <strong>{{ s.display_name }}</strong>
+        {% if s.show_participant_id %}
+          <br>ID: {{ s.participant_id }}
+        {% endif %}
+        <br>Submitted: {{ s.submitted_display }}
+        <br>Points: {{ s.points }}
+        <br>Source: {{ s.source }}
       </li>
     {% endfor %}
   </ul>

@@ -15,21 +15,27 @@ def get_submissions_for_list() -> list[dict[str, Any]]:
     participant_rows = load_list(data_path("participants.json"))
     display_name_map = build_display_name_map(participant_rows)
 
+    name_counts: dict[str, int] = {}
+    for display_name in display_name_map.values():
+        name_counts[display_name] = name_counts.get(display_name, 0) + 1
+
     submission_rows = load_list(data_path("submissions.json"))
     submissions = load_submissions(submission_rows)
 
     items: list[dict[str, Any]] = []
 
     for submission in submissions:
+        display_name = display_name_map.get(
+            submission.participant_id,
+            submission.participant_id,
+        )
+
         items.append(
             {
                 "submission_id": submission.submission_id,
-                "cycle_id": submission.cycle_id,
                 "participant_id": submission.participant_id,
-                "display_name": display_name_map.get(
-                    submission.participant_id,
-                    submission.participant_id,
-                ),
+                "display_name": display_name,
+                "show_participant_id": name_counts.get(display_name, 0) > 1,
                 "submitted_display": submission.submitted_at.isoformat(sep=" ", timespec="minutes"),
                 "points": submission.points,
                 "source": submission.source,
