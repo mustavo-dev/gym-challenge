@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-from gymchallenge.models import Cycle
+from .models import Cycle
 
 
 def cycle_window_start(cycle: Cycle, tz: ZoneInfo) -> datetime:

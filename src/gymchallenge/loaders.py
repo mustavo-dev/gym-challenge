@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any
 
-from .models import Membership
+from .models import Membership, Cycle
 
 
 def load_memberships(rows: list[dict[str, Any]]) -> list[Membership]:
@@ -20,6 +20,20 @@ def load_memberships(rows: list[dict[str, Any]]) -> list[Membership]:
                 inactive_effective_score_day=date.fromisoformat(r["inactive_effective_score_day"])
                 if r.get("inactive_effective_score_day")
                 else None,
+            )
+        )
+
+def load_cycles(rows: list[dict[str, Any]]) -> list[Cycle]:
+    out: list[Cycle] = []
+    for r in rows:
+        out.append(
+            Cycle(
+                cycle_id=r["cycle_id"],
+                name=r["name"],
+                start_day=date.fromisoformat(r["start_day"]),
+                end_day=date.fromisoformat(r["end_day"]),
+                created_at=datetime.fromisoformat(r["created_at"]),
+                active=bool(r.get("active", True)),
             )
         )
     return out

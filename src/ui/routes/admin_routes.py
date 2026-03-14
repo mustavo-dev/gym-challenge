@@ -3,6 +3,7 @@
 from flask import Blueprint, render_template
 from src.ui.services.participant_admin_service import get_participants_for_list
 from src.ui.services.membership_ui_service import get_memberships_for_list
+from src.ui.services.cycle_ui_service import get_cycles_for_list
 
 admin_bp = Blueprint(
     "admin",
@@ -59,9 +60,12 @@ def corrections_page():
 
 @admin_bp.get("/admin/cycles")
 def cycles_page():
+    """Render the admin cycles page."""
+    cycles = get_cycles_for_list()
     return render_template(
         "admin/cycles.html",
         page_title="Cycles",
+        cycles=cycles,
     )
 
 

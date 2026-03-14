@@ -6,6 +6,23 @@
 
 <h2>Cycles</h2>
 
-<p>Cycle management will appear here.</p>
+<p>Total cycles: {{ cycles|length }}</p>
+
+{% if cycles %}
+  <ul>
+    {% for cycle in cycles %}
+      <li>
+        <strong>{{ cycle.name }}</strong><br>
+        ID: {{ cycle.cycle_id }}<br>
+        Status: {{ cycle.status_label }}<br>
+        Start: {{ cycle.start_day }}<br>
+        End: {{ cycle.end_day }}<br>
+        Created: {{ cycle.created_display }}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No cycles found.</p>
+{% endif %}
 
 {% endblock %}

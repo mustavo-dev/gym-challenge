@@ -24,7 +24,7 @@ from gymchallenge.cycle_timeline import cycle_status, cycle_overlaps_existing, c
 from gymchallenge.cycle_store import find_cycle_row
 from gymchallenge.display_names import build_display_name_map
 from gymchallenge.demo_data_generator import generate_demo_participants, generate_demo_memberships, generate_demo_submissions
-from gymchallenge.loaders import load_memberships
+from gymchallenge.loaders import load_memberships, load_cycles
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -83,20 +83,6 @@ def load_membership_events(rows: list[dict[str, Any]]) -> list[MembershipEvent]:
         )
     return out
 
-def load_cycles(rows: list[dict[str, Any]]) -> list[Cycle]:
-    out: list[Cycle] = []
-    for r in rows:
-        out.append(
-            Cycle(
-                cycle_id=r["cycle_id"],
-                name=r["name"],
-                start_day=date.fromisoformat(r["start_day"]),
-                end_day=date.fromisoformat(r["end_day"]),
-                created_at=datetime.fromisoformat(r["created_at"]),
-                active=bool(r.get("active", True)),  # legacy field retained for now
-            )
-        )
-    return out
 
 def cmd_report(args: argparse.Namespace) -> int:
     from_day = parse_date(args.from_day)

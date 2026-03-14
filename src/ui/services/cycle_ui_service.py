@@ -1,0 +1,39 @@
+"""UI service functions for admin cycle views."""
+
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any
+
+from zoneinfo import ZoneInfo
+
+from src.gymchallenge.cycle_timeline import cycle_status
+from src.gymchallenge.data_paths import data_path
+from src.gymchallenge.loaders import load_cycles
+from src.gymchallenge.storage_json import load_list
+
+BERLIN = ZoneInfo("Europe/Berlin")
+
+
+def get_cycles_for_list() -> list[dict[str, Any]]:
+    """Return cycle rows formatted for admin list display."""
+    cycle_rows = load_list(data_path("cycles.json"))
+    cycles = load_cycles(cycle_rows)
+    now = datetime.now(BERLIN)
+
+    items: list[dict[str, Any]] = []
+
+    for cycle in cycles:
+        items.append(
+            {
+                "cycle_id": cycle.cycle_id,
+                "name": cycle.name,
+                "start_day": cycle.start_day.isoformat(),
+                "end_day": cycle.end_day.isoformat(),
+                "created_display": cycle.created_at.date().isoformat(),
+                "status_label": cycle_status(cycle, now, BERLIN).title(),
+            }
+        )
+
+    items.sort(key=lambda item: item["start_day"])
+    return items
