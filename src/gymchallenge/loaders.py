@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any
 
-from .models import Membership, Cycle, Submission, Correction
+from .models import Membership, Cycle, Submission, Correction, MembershipEvent
 
 
 def load_memberships(rows: list[dict[str, Any]]) -> list[Membership]:
@@ -67,6 +67,23 @@ def load_corrections(rows: list[dict[str, Any]]) -> list[Correction]:
                 reason=r["reason"],
                 created_at=datetime.fromisoformat(r["created_at"]),
                 admin=r.get("admin", "admin"),
+            )
+        )
+    return out
+
+def load_membership_events(rows: list[dict[str, Any]]) -> list[MembershipEvent]:
+    out: list[MembershipEvent] = []
+    for r in rows:
+        out.append(
+            MembershipEvent(
+                event_id=r["event_id"],
+                cycle_id=r["cycle_id"],
+                participant_id=r["participant_id"],
+                event_type=r["event_type"],
+                effective_score_day=date.fromisoformat(r["effective_score_day"]),
+                reason=r["reason"],
+                created_at=datetime.fromisoformat(r["created_at"]),
+                actor=r["actor"],
             )
         )
     return out
