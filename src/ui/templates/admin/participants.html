@@ -14,10 +14,8 @@
       <li>
         <strong>{{ participant.display_name }}</strong><br>
         ID: {{ participant.participant_id }}<br>
-        First: {{ participant.first_name }}<br>
-        Last: {{ participant.last_name }}<br>
-        Active: {{ participant.active }}<br>
-        Created: {{ participant.created_at }}
+        Status: {{ participant.status_label }}<br>
+        Created: {{ participant.created_display }}
       </li>
     {% endfor %}
   </ul>

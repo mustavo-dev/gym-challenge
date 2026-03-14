@@ -18,15 +18,15 @@ def get_participants_for_list() -> list[dict[str, Any]]:
 
     for row in participant_rows:
         participant_id = row["participant_id"]
+        created_at = row.get("created_at", "")
+        created_display = created_at[:10] if created_at else ""
 
         participants.append(
             {
                 "participant_id": participant_id,
                 "display_name": display_name_map.get(participant_id, participant_id),
-                "first_name": row.get("first_name", ""),
-                "last_name": row.get("last_name", ""),
-                "created_at": row.get("created_at", ""),
-                "active": bool(row.get("active", True)),
+                "status_label": "Active" if bool(row.get("active", True)) else "Inactive",
+                "created_display": created_display,
             }
         )
 
