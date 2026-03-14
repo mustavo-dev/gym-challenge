@@ -1,6 +1,6 @@
 """UI application entrypoint for the gym-challenge web interface."""
 
-from flask import Flask
+from flask import Flask, render_template
 
 
 def create_app() -> Flask:
@@ -8,7 +8,8 @@ def create_app() -> Flask:
     app = Flask(__name__)
 
     @app.get("/")
-    def healthcheck() -> str:
-        return "gym-challenge UI app is running"
+    def home() -> str:
+        """Render the shared base template as a simple UI smoke test."""
+        return render_template("base.html", page_title="gym-challenge UI")
 
     return app
