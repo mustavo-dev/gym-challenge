@@ -30,35 +30,39 @@ def participants_page():
         first = request.form.get("first_name", "").strip()
         last = request.form.get("last_name", "").strip()
 
-        if first and last:
-            from src.gymchallenge.participant_ops import generate_participant_id
-            from src.gymchallenge.storage_ops import append_row
-            from src.gymchallenge.storage_json import load_list
-            from src.gymchallenge.data_paths import data_path
-            from datetime import datetime
-            from zoneinfo import ZoneInfo
+        if not first or not last:
+            flash("First name and last name are required.", "error")
+            return redirect(url_for("admin.participants_page"))
 
-            BERLIN = ZoneInfo("Europe/Berlin")
+        from src.gymchallenge.participant_ops import generate_participant_id
+        from src.gymchallenge.storage_ops import append_row
+        from src.gymchallenge.storage_json import load_list
+        from src.gymchallenge.data_paths import data_path
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
 
-            path = data_path("participants.json")
-            existing = load_list(path)
+        BERLIN = ZoneInfo("Europe/Berlin")
 
-            participant_id = generate_participant_id(
-                first=first,
-                last=last,
-                existing_rows=existing,
-            )
+        path = data_path("participants.json")
+        existing = load_list(path)
 
-            row = {
-                "participant_id": participant_id,
-                "first_name": first,
-                "last_name": last,
-                "created_at": datetime.now(BERLIN).isoformat(),
-                "active": True,
-            }
+        participant_id = generate_participant_id(
+            first=first,
+            last=last,
+            existing_rows=existing,
+        )
 
-            append_row(path, row)
+        row = {
+            "participant_id": participant_id,
+            "first_name": first,
+            "last_name": last,
+            "created_at": datetime.now(BERLIN).isoformat(),
+            "active": True,
+        }
 
+        append_row(path, row)
+
+        flash(f"Added participant: {participant_id}", "success")
         return redirect(url_for("admin.participants_page"))
 
     participants = get_participants_for_list()
