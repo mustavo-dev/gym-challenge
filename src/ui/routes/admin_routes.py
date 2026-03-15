@@ -288,18 +288,117 @@ def cycles_page():
         cycles=cycles,
     )
 
-
-@admin_bp.get("/admin/reports")
+@admin_bp.route("/admin/reports", methods=["GET", "POST"])
 def reports_page():
-    """Render the admin reports page."""
+    """Render and process the admin reports page."""
     cycle_choices = get_cycles_for_list()
+
+    if request.method == "POST":
+        cycle_id = request.form.get("cycle_id", "").strip()
+        report_type = request.form.get("report_type", "").strip()
+        include_inactive = request.form.get("include_inactive") == "1"
+
+        if not cycle_id:
+            flash("Cycle is required.", "error")
+            return redirect(url_for("admin.reports_page"))
+
+        if report_type != "leaderboard":
+            flash("Unsupported report type.", "error")
+            return redirect(url_for("admin.reports_page"))
+
+        import csv
+        from io import StringIO
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        from flask import Response
+
+        from src.gymchallenge.data_paths import data_path
+        from src.gymchallenge.storage_json import load_list
+        from src.gymchallenge.loaders import (
+            load_cycles,
+            load_memberships,
+            load_submissions,
+            load_corrections,
+            load_membership_events,
+        )
+        from src.gymchallenge.display_names import build_display_name_map
+        from src.gymchallenge.scoring_engine import compute_daily_scores, build_leaderboard
+
+        BERLIN = ZoneInfo("Europe/Berlin")
+
+        cycle_rows = load_list(data_path("cycles.json"))
+        membership_rows = load_list(data_path("memberships.json"))
+        membership_event_rows = load_list(data_path("membership_events.json"))
+        submission_rows = load_list(data_path("submissions.json"))
+        correction_rows = load_list(data_path("corrections.json"))
+        participant_rows = load_list(data_path("participants.json"))
+
+        cycles = load_cycles(cycle_rows)
+        memberships = load_memberships(membership_rows)
+        membership_events = load_membership_events(membership_event_rows)
+        submissions = load_submissions(submission_rows)
+        corrections = load_corrections(correction_rows)
+
+        selected_cycle = next((c for c in cycles if c.cycle_id == cycle_id), None)
+        if selected_cycle is None:
+            flash("Selected cycle was not found.", "error")
+            return redirect(url_for("admin.reports_page"))
+
+        display_name_map = build_display_name_map(participant_rows)
+
+        cycle_memberships = [m for m in memberships if m.cycle_id == cycle_id]
+        participant_ids = sorted({m.participant_id for m in cycle_memberships})
+
+        daily = compute_daily_scores(
+            participant_ids=participant_ids,
+            submissions=submissions,
+            tz=BERLIN,
+            cycle_start=selected_cycle.start_day,
+            cycle_end=selected_cycle.end_day,
+            missing_points=-3,
+            corrections=corrections,
+        )
+
+        leaderboard = build_leaderboard(
+            memberships=cycle_memberships,
+            membership_events=[e for e in membership_events if e.cycle_id == cycle_id],
+            tz=BERLIN,
+            daily=daily,
+            from_day=selected_cycle.start_day,
+            to_day=selected_cycle.end_day,
+            include_inactive=include_inactive,
+        )
+
+        output = StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["rank", "participant_id", "display_name", "total_points"])
+
+        for rank, (participant_id, total_points) in enumerate(leaderboard, start=1):
+            writer.writerow(
+                [
+                    rank,
+                    participant_id,
+                    display_name_map.get(participant_id, participant_id),
+                    total_points,
+                ]
+            )
+
+        csv_data = output.getvalue()
+        filename = f"leaderboard_{cycle_id}.csv"
+
+        return Response(
+            csv_data,
+            mimetype="text/csv",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            },
+        )
 
     return render_template(
         "admin/reports.html",
         page_title="Reports",
         cycle_choices=cycle_choices,
     )
-
 
 @admin_bp.get("/admin/system")
 def system_page():

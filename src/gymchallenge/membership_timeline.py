@@ -5,8 +5,8 @@ from typing import Iterable
 
 from zoneinfo import ZoneInfo
 
-from gymchallenge.models import Membership, MembershipEvent
-from gymchallenge.scoring_time import score_day_for_timestamp
+from .models import Membership, MembershipEvent
+from .scoring_time import score_day_for_timestamp
 
 
 INACTIVE_EVENT_TYPES = {"auto_inactive", "manual_inactive"}

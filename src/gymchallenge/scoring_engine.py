@@ -5,10 +5,10 @@ from typing import Dict, List
 from zoneinfo import ZoneInfo
 from dataclasses import dataclass
 
-from gymchallenge.models import Submission, Membership, Correction, MembershipEvent
-from gymchallenge.scoring_time import score_day_for_timestamp
-from gymchallenge.cycle_rules import score_day_in_cycle
-from gymchallenge.membership_timeline import build_active_day_map
+from .models import Submission, Membership, Correction, MembershipEvent
+from .scoring_time import score_day_for_timestamp
+from .cycle_rules import score_day_in_cycle
+from .membership_timeline import build_active_day_map
 
 @dataclass(frozen=True)
 class DailyScore:

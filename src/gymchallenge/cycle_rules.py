@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-from gymchallenge.scoring_time import score_day_for_timestamp
+from .scoring_time import score_day_for_timestamp
 
 
 def score_day_in_cycle(score_day: date, cycle_start: date, cycle_end: date) -> bool:
