@@ -64,8 +64,10 @@
   </div>
 </form>
 
-<p>This form will be connected in the next block.</p>
+<p>This form is now connected to cycle creation.</p>
 
 {% include "admin/partials/two_panel_end.html" %}
+
+<script src="{{ url_for('static', filename='js/cycle_form.js') }}"></script>
 
 {% endblock %}
