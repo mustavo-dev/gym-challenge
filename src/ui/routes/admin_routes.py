@@ -96,9 +96,52 @@ def submissions_page():
     )
 
 
-@admin_bp.get("/admin/corrections")
+@admin_bp.route("/admin/corrections", methods=["GET", "POST"])
 def corrections_page():
-    """Render the admin corrections page."""
+    if request.method == "POST":
+        participant_id = request.form.get("participant_id", "").strip()
+        score_day = request.form.get("score_day", "").strip()
+        new_points_raw = request.form.get("new_points", "").strip()
+        reason = request.form.get("reason", "").strip()
+
+        if not (participant_id and score_day and new_points_raw and reason):
+            flash("All correction fields are required.", "error")
+            return redirect(url_for("admin.corrections_page"))
+
+        from datetime import date, datetime
+        from zoneinfo import ZoneInfo
+
+        from src.gymchallenge.id_ops import new_correction_id
+        from src.gymchallenge.storage_json import load_list
+        from src.gymchallenge.storage_ops import append_row
+        from src.gymchallenge.data_paths import data_path
+
+        BERLIN = ZoneInfo("Europe/Berlin")
+
+        try:
+            new_points = int(new_points_raw)
+        except ValueError:
+            flash("Points must be a number.", "error")
+            return redirect(url_for("admin.corrections_page"))
+
+        correction_id = new_correction_id()
+
+        row = {
+            "correction_id": correction_id,
+            "cycle_id": "fall26",  # temporary — future block will infer cycle automatically
+            "participant_id": participant_id,
+            "score_day": date.fromisoformat(score_day).isoformat(),
+            "new_points": new_points,
+            "reason": reason,
+            "created_at": datetime.now(BERLIN).isoformat(),
+            "admin": "jayme",
+        }
+
+        append_row(data_path("corrections.json"), row)
+
+        flash(f"Correction added for participant.", "success")
+        return redirect(url_for("admin.corrections_page"))
+
     corrections = get_corrections_for_list()
     participant_choices = get_participant_choices()
 
