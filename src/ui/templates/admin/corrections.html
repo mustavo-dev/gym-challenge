@@ -8,6 +8,10 @@
 
 <p>Total corrections: {{ total }}</p>
 
+{% include "admin/partials/two_panel_start.html" %}
+
+<h3>Correction History</h3>
+
 {% if corrections %}
   <ul>
     {% for c in corrections %}
@@ -24,5 +28,13 @@
 {% else %}
   <p>No corrections found.</p>
 {% endif %}
+
+{% include "admin/partials/two_panel_switch.html" %}
+
+<h3>Add Correction</h3>
+
+<p>Correction form will appear here in the next block.</p>
+
+{% include "admin/partials/two_panel_end.html" %}
 
 {% endblock %}
