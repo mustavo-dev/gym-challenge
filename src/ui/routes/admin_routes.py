@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from src.ui.services.participant_admin_service import get_participants_for_list, get_participant_choices
 from src.ui.services.membership_ui_service import get_memberships_for_list, filter_memberships_for_view
 from src.ui.services.cycle_ui_service import get_cycles_for_list, find_cycle_id_for_score_day
-from src.ui.services.submission_ui_service import get_submissions_for_list
+from src.ui.services.submission_ui_service import get_submissions_for_list, filter_and_sort_submissions_for_view
 from src.ui.services.correction_ui_service import get_corrections_for_list
 from src.ui.services.history_ui_service import get_history_for_list
 
@@ -141,11 +141,28 @@ def memberships_page():
 @admin_bp.get("/admin/submissions")
 def submissions_page():
     """Render the admin submissions page."""
+    participant_id = request.args.get("participant_id", "").strip()
+    points_value = request.args.get("points", "").strip()
+    sort_value = request.args.get("sort", "newest").strip()
+
     submissions = get_submissions_for_list()
+    submissions = filter_and_sort_submissions_for_view(
+        submissions=submissions,
+        participant_id=participant_id,
+        points_value=points_value,
+        sort_value=sort_value,
+    )
+
+    participant_choices = get_participant_choices()
+
     return render_template(
         "admin/submissions.html",
         page_title="Submissions",
         submissions=submissions,
+        participant_choices=participant_choices,
+        participant_id=participant_id,
+        points_value=points_value,
+        sort_value=sort_value,
         total=len(submissions),
     )
 

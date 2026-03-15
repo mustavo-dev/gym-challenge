@@ -8,6 +8,51 @@
 
 <p>Total submissions: {{ total }}</p>
 
+<form method="get">
+  <div>
+    <label for="participant_id">Participant</label><br>
+    <select id="participant_id" name="participant_id">
+      <option value="">All Participants</option>
+      {% for participant in participant_choices %}
+        <option value="{{ participant.participant_id }}" {% if participant_id == participant.participant_id %}selected{% endif %}>
+          {{ participant.display_name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label for="points">Points</label><br>
+    <select id="points" name="points">
+      <option value="" {% if points_value == "" %}selected{% endif %}>All Points</option>
+      <option value="5" {% if points_value == "5" %}selected{% endif %}>5</option>
+      <option value="4" {% if points_value == "4" %}selected{% endif %}>4</option>
+      <option value="3" {% if points_value == "3" %}selected{% endif %}>3</option>
+      <option value="2" {% if points_value == "2" %}selected{% endif %}>2</option>
+      <option value="1" {% if points_value == "1" %}selected{% endif %}>1</option>
+      <option value="0" {% if points_value == "0" %}selected{% endif %}>0</option>
+      <option value="-1" {% if points_value == "-1" %}selected{% endif %}>-1</option>
+      <option value="-2" {% if points_value == "-2" %}selected{% endif %}>-2</option>
+      <option value="-3" {% if points_value == "-3" %}selected{% endif %}>-3</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="sort">Sort</label><br>
+    <select id="sort" name="sort">
+      <option value="newest" {% if sort_value == "newest" %}selected{% endif %}>Newest First</option>
+      <option value="oldest" {% if sort_value == "oldest" %}selected{% endif %}>Oldest First</option>
+      <option value="highest_points" {% if sort_value == "highest_points" %}selected{% endif %}>Highest Points</option>
+      <option value="lowest_points" {% if sort_value == "lowest_points" %}selected{% endif %}>Lowest Points</option>
+      <option value="name_az" {% if sort_value == "name_az" %}selected{% endif %}>Participant Name A-Z</option>
+    </select>
+  </div>
+
+  <div>
+    <button type="submit">Apply Filters</button>
+  </div>
+</form>
+
 {% if submissions %}
   <ul>
     {% for s in submissions %}
