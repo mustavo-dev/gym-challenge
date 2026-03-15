@@ -104,9 +104,58 @@ def corrections_page():
     )
 
 
-@admin_bp.get("/admin/cycles")
+@admin_bp.route("/admin/cycles", methods=["GET", "POST"])
 def cycles_page():
-    """Render the admin cycles page."""
+    if request.method == "POST":
+        season = request.form.get("season", "").strip().lower()
+        year_raw = request.form.get("year", "").strip()
+        start_day = request.form.get("start_day", "").strip()
+        end_day = request.form.get("end_day", "").strip()
+
+        if season and year_raw and start_day and end_day:
+            from datetime import date, datetime
+            from zoneinfo import ZoneInfo
+
+            from src.gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_cycle_id
+            from src.gymchallenge.cycle_timeline import cycle_overlaps_existing
+            from src.gymchallenge.data_paths import data_path
+            from src.gymchallenge.loaders import load_cycles
+            from src.gymchallenge.storage_json import load_list
+            from src.gymchallenge.storage_ops import append_row
+            from src.gymchallenge.models import Cycle
+
+            BERLIN = ZoneInfo("Europe/Berlin")
+
+            year = int(year_raw)
+            rows = load_list(data_path("cycles.json"))
+            existing_cycles = load_cycles(rows)
+
+            cycle_id = build_cycle_id(season, year)
+            cycle_name = build_cycle_name(season, year)
+
+            if not has_cycle_id(rows, cycle_id):
+                new_cycle = Cycle(
+                    cycle_id=cycle_id,
+                    name=cycle_name,
+                    start_day=date.fromisoformat(start_day),
+                    end_day=date.fromisoformat(end_day),
+                    created_at=datetime.now(BERLIN),
+                    active=True,
+                )
+
+                if not cycle_overlaps_existing(new_cycle, existing_cycles, BERLIN):
+                    row = {
+                        "cycle_id": new_cycle.cycle_id,
+                        "name": new_cycle.name,
+                        "start_day": new_cycle.start_day.isoformat(),
+                        "end_day": new_cycle.end_day.isoformat(),
+                        "created_at": new_cycle.created_at.isoformat(),
+                        "active": new_cycle.active,
+                    }
+                    append_row(data_path("cycles.json"), row)
+
+        return redirect(url_for("admin.cycles_page"))
+
     cycles = get_cycles_for_list()
     return render_template(
         "admin/cycles.html",
