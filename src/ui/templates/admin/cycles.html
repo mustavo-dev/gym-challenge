@@ -8,6 +8,10 @@
 
 <p>Total cycles: {{ cycles|length }}</p>
 
+{% include "admin/partials/two_panel_start.html" %}
+
+<h3>Current Cycles</h3>
+
 {% if cycles %}
   <ul>
     {% for cycle in cycles %}
@@ -24,5 +28,13 @@
 {% else %}
   <p>No cycles found.</p>
 {% endif %}
+
+{% include "admin/partials/two_panel_switch.html" %}
+
+<h3>Create Cycle</h3>
+
+<p>Cycle creation form will appear here in the next block.</p>
+
+{% include "admin/partials/two_panel_end.html" %}
 
 {% endblock %}
