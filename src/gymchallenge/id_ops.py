@@ -11,3 +11,7 @@ def new_correction_id() -> str:
 
 def new_membership_event_id() -> str:
     return f"evt_{secrets.token_hex(4)}"
+
+def new_system_event_id() -> str:
+    import uuid
+    return f"sys_{uuid.uuid4().hex[:8]}"

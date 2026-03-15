@@ -427,8 +427,11 @@ def reports_page():
 @admin_bp.route("/admin/system", methods=["GET", "POST"])
 def system_page():
     """Render and process the admin system page."""
+    from datetime import datetime
     from src.gymchallenge.data_paths import data_path
     from src.gymchallenge.storage_json import load_list, save_list
+    from src.gymchallenge.id_ops import new_system_event_id
+    from src.gymchallenge.storage_ops import append_row
     from src.gymchallenge.participant_store import (
         archive_participant_row,
         restore_participant_row,
@@ -456,6 +459,19 @@ def system_page():
                 return redirect(url_for("admin.system_page"))
 
             save_list(data_path("participants.json"), participant_rows)
+
+            append_row(
+                data_path("system_events.json"),
+                {
+                    "event_id": new_system_event_id(),
+                    "event_type": "participant_archived",
+                    "participant_id": participant_id,
+                    "reason": "archived via system page",
+                    "created_at": datetime.now().astimezone().isoformat(),
+                    "actor": "jayme",
+                },
+            )
+
             flash("Participant archived successfully.", "success")
             return redirect(url_for("admin.system_page"))
 
@@ -466,6 +482,19 @@ def system_page():
                 return redirect(url_for("admin.system_page"))
 
             save_list(data_path("participants.json"), participant_rows)
+
+            append_row(
+                data_path("system_events.json"),
+                {
+                    "event_id": new_system_event_id(),
+                    "event_type": "participant_restored",
+                    "participant_id": participant_id,
+                    "reason": "restored via system page",
+                    "created_at": datetime.now().astimezone().isoformat(),
+                    "actor": "jayme",
+                },
+            )
+
             flash("Participant restored successfully.", "success")
             return redirect(url_for("admin.system_page"))
 

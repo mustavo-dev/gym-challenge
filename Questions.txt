@@ -5,3 +5,5 @@ UX/UI pass info:
 - Ensure all failures are in human readable language and not CLI script
 
 - perfect attendance? shorthand way to see who participated without computer assistance
+
+- filter for coorections to see who is earning bonus points

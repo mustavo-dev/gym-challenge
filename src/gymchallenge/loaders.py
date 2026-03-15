@@ -87,3 +87,20 @@ def load_membership_events(rows: list[dict[str, Any]]) -> list[MembershipEvent]:
             )
         )
     return out
+
+def load_system_events(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+    out: list[dict[str, object]] = []
+
+    for row in rows:
+        out.append(
+            {
+                "event_id": row["event_id"],
+                "event_type": row["event_type"],
+                "participant_id": row.get("participant_id"),
+                "reason": row.get("reason", ""),
+                "created_at": datetime.fromisoformat(str(row["created_at"])),
+                "actor": row.get("actor", "system"),
+            }
+        )
+
+    return out
