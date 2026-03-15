@@ -7,7 +7,7 @@ from src.ui.services.membership_ui_service import get_memberships_for_list, filt
 from src.ui.services.cycle_ui_service import get_cycles_for_list, find_cycle_id_for_score_day
 from src.ui.services.submission_ui_service import get_submissions_for_list, filter_and_sort_submissions_for_view
 from src.ui.services.correction_ui_service import get_corrections_for_list
-from src.ui.services.history_ui_service import get_history_for_list
+from src.ui.services.history_ui_service import get_history_for_list, filter_and_sort_history_for_view
 
 admin_bp = Blueprint(
     "admin",
@@ -428,10 +428,27 @@ def system_page():
 @admin_bp.get("/admin/history")
 def history_page():
     """Render the admin history page."""
-    history_items = get_history_for_list()
+    entry_type = request.args.get("entry_type", "all").strip()
+    participant_id = request.args.get("participant_id", "").strip()
+    sort_value = request.args.get("sort", "newest").strip()
+
+    history_entries = get_history_for_list()
+    history_entries = filter_and_sort_history_for_view(
+        history_entries=history_entries,
+        entry_type=entry_type,
+        participant_id=participant_id,
+        sort_value=sort_value,
+    )
+
+    participant_choices = get_participant_choices()
+
     return render_template(
         "admin/history.html",
         page_title="History",
-        history_items=history_items,
-        total=len(history_items),
+        history_entries=history_entries,
+        participant_choices=participant_choices,
+        entry_type=entry_type,
+        participant_id=participant_id,
+        sort_value=sort_value,
+        total=len(history_entries),
     )

@@ -8,17 +8,51 @@
 
 <p>Total history entries: {{ total }}</p>
 
-{% if history_items %}
+<form method="get">
+  <div>
+    <label for="entry_type">Entry Type</label><br>
+    <select id="entry_type" name="entry_type">
+      <option value="all" {% if entry_type == "all" %}selected{% endif %}>All Entries</option>
+      <option value="correction" {% if entry_type == "correction" %}selected{% endif %}>Corrections</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="participant_id">Participant</label><br>
+    <select id="participant_id" name="participant_id">
+      <option value="">All Participants</option>
+      {% for participant in participant_choices %}
+        <option value="{{ participant.participant_id }}" {% if participant_id == participant.participant_id %}selected{% endif %}>
+          {{ participant.display_name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label for="sort">Sort</label><br>
+    <select id="sort" name="sort">
+      <option value="newest" {% if sort_value == "newest" %}selected{% endif %}>Newest First</option>
+      <option value="oldest" {% if sort_value == "oldest" %}selected{% endif %}>Oldest First</option>
+    </select>
+  </div>
+
+  <div>
+    <button type="submit">Apply Filters</button>
+  </div>
+</form>
+
+{% if history_entries %}
   <ul>
-    {% for item in history_items %}
+    {% for entry in history_entries %}
       <li>
-        <strong>{{ item.display_name }}</strong><br>
-        Type: {{ item.entry_type }}<br>
-        Event: {{ item.event_label }}<br>
-        Date: {{ item.date_label }}<br>
-        {{ item.detail_1 }}<br>
-        {{ item.detail_2 }}<br>
-        {{ item.detail_3 }}
+        <strong>{{ entry.display_name }}</strong><br>
+        Type: {{ entry.entry_type }}<br>
+        Event: {{ entry.event_label }}<br>
+        Date: {{ entry.date_label }}<br>
+        {{ entry.detail_1 }}<br>
+        {{ entry.detail_2 }}<br>
+        {{ entry.detail_3 }}
       </li>
     {% endfor %}
   </ul>
