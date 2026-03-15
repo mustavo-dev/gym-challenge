@@ -95,3 +95,9 @@
 form[method="get"] {
   margin-bottom: 1rem;
 }
+
+.admin-panel input[type="text"],
+form[method="get"] input[type="text"] {
+  padding: 6px;
+  margin-right: 6px;
+}

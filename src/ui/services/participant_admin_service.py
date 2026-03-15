@@ -51,3 +51,19 @@ def get_participant_choices() -> list[dict[str, str]]:
 
     items.sort(key=lambda item: item["display_name"].lower())
     return items
+
+def filter_participants_for_view(
+    participants: list[dict[str, str]],
+    search_value: str,
+) -> list[dict[str, str]]:
+    """Filter participant rows by display name."""
+    if not search_value:
+        return participants
+
+    term = search_value.lower()
+
+    return [
+        row
+        for row in participants
+        if term in row.get("display_name", "").lower()
+    ]

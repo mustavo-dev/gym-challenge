@@ -6,7 +6,21 @@
 
 <h2>Participants</h2>
 
-<p>Total participants: {{ participants|length }}</p>
+<p>Total participants: {{ total }}</p>
+
+<form method="get">
+  <div>
+    <label for="search">Search Participant</label><br>
+    <input
+      type="text"
+      id="search"
+      name="search"
+      placeholder="Search by name..."
+      value="{{ search_value }}"
+    >
+    <button type="submit">Search</button>
+  </div>
+</form>
 
 {% include "admin/partials/two_panel_start.html" %}
 

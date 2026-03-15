@@ -2,7 +2,7 @@
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 
-from src.ui.services.participant_admin_service import get_participants_for_list, get_participant_choices
+from src.ui.services.participant_admin_service import get_participants_for_list, get_participant_choices, filter_participants_for_view
 from src.ui.services.membership_ui_service import get_memberships_for_list, filter_memberships_for_view
 from src.ui.services.cycle_ui_service import get_cycles_for_list, find_cycle_id_for_score_day
 from src.ui.services.submission_ui_service import get_submissions_for_list, filter_and_sort_submissions_for_view
@@ -65,11 +65,17 @@ def participants_page():
         flash(f"Added participant: {participant_id}", "success")
         return redirect(url_for("admin.participants_page"))
 
+    search_value = request.args.get("search", "").strip()
+
     participants = get_participants_for_list()
+    participants = filter_participants_for_view(participants, search_value)
 
     return render_template(
         "admin/participants.html",
+        page_title="Participants",
         participants=participants,
+        search_value=search_value,
+        total=len(participants),
     )
 
 
