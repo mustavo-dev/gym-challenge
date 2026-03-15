@@ -33,7 +33,33 @@
 
 <h3>Add Correction</h3>
 
-<p>Correction form will appear here in the next block.</p>
+<form method="post" action="#">
+  <div>
+    <label for="participant_id">Participant</label><br>
+    <input id="participant_id" name="participant_id" type="text" placeholder="participant-id">
+  </div>
+
+  <div>
+    <label for="score_day">Score Day</label><br>
+    <input id="score_day" name="score_day" type="date">
+  </div>
+
+  <div>
+    <label for="new_points">New Points</label><br>
+    <input id="new_points" name="new_points" type="number" min="-10" max="10">
+  </div>
+
+  <div>
+    <label for="reason">Reason</label><br>
+    <input id="reason" name="reason" type="text" placeholder="reason for correction">
+  </div>
+
+  <div>
+    <button type="submit">Add Correction</button>
+  </div>
+</form>
+
+<p>This form will be connected in the next block.</p>
 
 {% include "admin/partials/two_panel_end.html" %}
 
