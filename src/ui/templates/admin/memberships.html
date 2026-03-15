@@ -8,6 +8,24 @@
 
 <p>Total memberships: {{ memberships|length }}</p>
 
+<form method="get">
+  <div>
+    <label for="membership_filter">Filter Memberships</label><br>
+    <select id="membership_filter" name="membership_filter" onchange="this.form.submit()">
+      <option value="all" {% if membership_filter == "all" %}selected{% endif %}>All Cycles</option>
+      <option value="active" {% if membership_filter == "active" %}selected{% endif %}>Active Cycles</option>
+      <option value="planned" {% if membership_filter == "planned" %}selected{% endif %}>Planned Cycles</option>
+      <option value="closed" {% if membership_filter == "closed" %}selected{% endif %}>Closed Cycles</option>
+
+      {% for cycle in cycle_choices %}
+        <option value="{{ cycle.cycle_id }}" {% if membership_filter == cycle.cycle_id %}selected{% endif %}>
+          {{ cycle.name }} ({{ cycle.cycle_id }})
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+</form>
+
 {% include "admin/partials/two_panel_start.html" %}
 
 <h3>Current Memberships</h3>

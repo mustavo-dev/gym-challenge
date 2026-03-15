@@ -3,7 +3,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 
 from src.ui.services.participant_admin_service import get_participants_for_list, get_participant_choices
-from src.ui.services.membership_ui_service import get_memberships_for_list
+from src.ui.services.membership_ui_service import get_memberships_for_list, filter_memberships_for_view
 from src.ui.services.cycle_ui_service import get_cycles_for_list, find_cycle_id_for_score_day
 from src.ui.services.submission_ui_service import get_submissions_for_list
 from src.ui.services.correction_ui_service import get_corrections_for_list
@@ -120,7 +120,11 @@ def memberships_page():
         flash("Member successfully added to cycle.", "success")
         return redirect(url_for("admin.memberships_page"))
 
+    membership_filter = request.args.get("membership_filter", "all").strip()
+
     memberships = get_memberships_for_list()
+    memberships = filter_memberships_for_view(memberships, membership_filter)
+
     participant_choices = get_participant_choices()
     cycle_choices = get_cycles_for_list()
 
@@ -130,6 +134,7 @@ def memberships_page():
         memberships=memberships,
         participant_choices=participant_choices,
         cycle_choices=cycle_choices,
+        membership_filter=membership_filter,
     )
 
 
