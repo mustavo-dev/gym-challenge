@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 
 from src.ui.services.participant_admin_service import get_participants_for_list, get_participant_choices
 from src.ui.services.membership_ui_service import get_memberships_for_list
-from src.ui.services.cycle_ui_service import get_cycles_for_list
+from src.ui.services.cycle_ui_service import get_cycles_for_list, find_cycle_id_for_score_day
 from src.ui.services.submission_ui_service import get_submissions_for_list
 from src.ui.services.correction_ui_service import get_corrections_for_list
 from src.ui.services.history_ui_service import get_history_for_list
@@ -124,13 +124,24 @@ def corrections_page():
             flash("Points must be a number.", "error")
             return redirect(url_for("admin.corrections_page"))
 
+        try:
+            score_day_date = date.fromisoformat(score_day)
+        except ValueError:
+            flash("Score day must be a valid date.", "error")
+            return redirect(url_for("admin.corrections_page"))
+
+        cycle_id = find_cycle_id_for_score_day(score_day_date)
+        if cycle_id is None:
+            flash("No matching cycle found for that score day.", "error")
+            return redirect(url_for("admin.corrections_page"))
+
         correction_id = new_correction_id()
 
         row = {
             "correction_id": correction_id,
-            "cycle_id": "fall26",  # temporary — future block will infer cycle automatically
+            "cycle_id": cycle_id,
             "participant_id": participant_id,
-            "score_day": date.fromisoformat(score_day).isoformat(),
+            "score_day": score_day_date.isoformat(),
             "new_points": new_points,
             "reason": reason,
             "created_at": datetime.now(BERLIN).isoformat(),

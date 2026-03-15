@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from zoneinfo import ZoneInfo
@@ -37,3 +37,19 @@ def get_cycles_for_list() -> list[dict[str, Any]]:
 
     items.sort(key=lambda item: item["start_day"])
     return items
+
+def find_cycle_id_for_score_day(score_day: date) -> str | None:
+    """Return the cycle_id whose start/end day contains the given score day."""
+    cycle_rows = load_list(data_path("cycles.json"))
+    cycles = load_cycles(cycle_rows)
+
+    matches = [
+        cycle
+        for cycle in cycles
+        if cycle.start_day <= score_day <= cycle.end_day
+    ]
+
+    if len(matches) == 1:
+        return matches[0].cycle_id
+
+    return None
