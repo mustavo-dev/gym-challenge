@@ -11,7 +11,7 @@
   <p><strong>Current Cycle:</strong> {{ active_cycle.name }}</p>
 {% endif %}
 
-<form method="post">
+<form method="post" id="submit-score-form">
   <div>
     <label for="participant_id">Participant</label>
     <select id="participant_id" name="participant_id" {% if not submit_enabled %}disabled{% endif %}>
@@ -48,10 +48,7 @@
 <section>
   <h3>Scoring Rules</h3>
 
-  <p>
-    Positive (+) 1 Point:
-  </p>
-
+  <p>Positive (+) 1 Point:</p>
   <ul>
     <li>Seven plus hours of sleep</li>
     <li>Protein Goal</li>
@@ -60,20 +57,14 @@
     <li>Two plus liters of water</li>
   </ul>
 
-  <p>
-    Negative (-) 1 Point:
-  </p>
-
+  <p>Negative (-) 1 Point:</p>
   <ul>
     <li>Alcohol Consumption</li>
     <li>Consumed Added Sugar</li>
     <li>Consumed Fast Food</li>
   </ul>
 
-  <p>
-    Daily participation is recorded during the challenge scoring window.
-  </p>
-
+  <p>Daily participation is recorded during the challenge scoring window.</p>
   <ul>
     <li>Score day opens at 20:00</li>
     <li>Score day closes at 11:59 the following day</li>
@@ -81,10 +72,20 @@
     <li>Duplicate submissions are not allowed</li>
   </ul>
 
-  <p>
-    Your submission timestamp will be recorded automatically.
-  </p>
+  <p>Your submission timestamp will be recorded automatically.</p>
 </section>
 
-{% endblock %}O
+{% if auto_reset_success %}
+<script>
+  window.addEventListener("DOMContentLoaded", function () {
+    const successMessages = document.querySelectorAll(".flash-success");
+    successMessages.forEach(function (message) {
+      setTimeout(function () {
+        message.remove();
+      }, 6000);
+    });
+  });
+</script>
+{% endif %}
 
+{% endblock %}
