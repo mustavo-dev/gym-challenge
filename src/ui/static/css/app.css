@@ -69,3 +69,25 @@
 .flash-success {
   border-color: #66aa66;
 }
+
+.form-row-checkbox {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-row-label {
+  font-weight: 600;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  max-width: none;
+  padding: 0;
+  box-sizing: border-box;
+}
