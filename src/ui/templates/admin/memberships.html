@@ -8,6 +8,10 @@
 
 <p>Total memberships: {{ memberships|length }}</p>
 
+{% include "admin/partials/two_panel_start.html" %}
+
+<h3>Current Memberships</h3>
+
 {% if memberships %}
   <ul>
     {% for membership in memberships %}
@@ -28,5 +32,13 @@
 {% else %}
   <p>No memberships found.</p>
 {% endif %}
+
+{% include "admin/partials/two_panel_switch.html" %}
+
+<h3>Add Membership</h3>
+
+<p>Membership action form will appear here in the next block.</p>
+
+{% include "admin/partials/two_panel_end.html" %}
 
 {% endblock %}
