@@ -1,6 +1,6 @@
 """Admin-facing UI routes."""
 
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 
 from src.ui.services.participant_admin_service import get_participants_for_list
 from src.ui.services.membership_ui_service import get_memberships_for_list
@@ -112,48 +112,58 @@ def cycles_page():
         start_day = request.form.get("start_day", "").strip()
         end_day = request.form.get("end_day", "").strip()
 
-        if season and year_raw and start_day and end_day:
-            from datetime import date, datetime
-            from zoneinfo import ZoneInfo
+        if not (season and year_raw and start_day and end_day):
+            flash("All cycle fields are required.", "error")
+            return redirect(url_for("admin.cycles_page"))
 
-            from src.gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_cycle_id
-            from src.gymchallenge.cycle_timeline import cycle_overlaps_existing
-            from src.gymchallenge.data_paths import data_path
-            from src.gymchallenge.loaders import load_cycles
-            from src.gymchallenge.storage_json import load_list
-            from src.gymchallenge.storage_ops import append_row
-            from src.gymchallenge.models import Cycle
+        from datetime import date, datetime
+        from zoneinfo import ZoneInfo
 
-            BERLIN = ZoneInfo("Europe/Berlin")
+        from src.gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_cycle_id
+        from src.gymchallenge.cycle_timeline import cycle_overlaps_existing
+        from src.gymchallenge.data_paths import data_path
+        from src.gymchallenge.loaders import load_cycles
+        from src.gymchallenge.storage_json import load_list
+        from src.gymchallenge.storage_ops import append_row
+        from src.gymchallenge.models import Cycle
 
-            year = int(year_raw)
-            rows = load_list(data_path("cycles.json"))
-            existing_cycles = load_cycles(rows)
+        BERLIN = ZoneInfo("Europe/Berlin")
 
-            cycle_id = build_cycle_id(season, year)
-            cycle_name = build_cycle_name(season, year)
+        year = int(year_raw)
+        rows = load_list(data_path("cycles.json"))
+        existing_cycles = load_cycles(rows)
 
-            if not has_cycle_id(rows, cycle_id):
-                new_cycle = Cycle(
-                    cycle_id=cycle_id,
-                    name=cycle_name,
-                    start_day=date.fromisoformat(start_day),
-                    end_day=date.fromisoformat(end_day),
-                    created_at=datetime.now(BERLIN),
-                    active=True,
-                )
+        cycle_id = build_cycle_id(season, year)
+        cycle_name = build_cycle_name(season, year)
 
-                if not cycle_overlaps_existing(new_cycle, existing_cycles, BERLIN):
-                    row = {
-                        "cycle_id": new_cycle.cycle_id,
-                        "name": new_cycle.name,
-                        "start_day": new_cycle.start_day.isoformat(),
-                        "end_day": new_cycle.end_day.isoformat(),
-                        "created_at": new_cycle.created_at.isoformat(),
-                        "active": new_cycle.active,
-                    }
-                    append_row(data_path("cycles.json"), row)
+        if has_cycle_id(rows, cycle_id):
+            flash(f"Cycle already exists: {cycle_id}", "error")
+            return redirect(url_for("admin.cycles_page"))
 
+        new_cycle = Cycle(
+            cycle_id=cycle_id,
+            name=cycle_name,
+            start_day=date.fromisoformat(start_day),
+            end_day=date.fromisoformat(end_day),
+            created_at=datetime.now(BERLIN),
+            active=True,
+        )
+
+        if cycle_overlaps_existing(new_cycle, existing_cycles, BERLIN):
+            flash("Cycle window overlaps an existing cycle.", "error")
+            return redirect(url_for("admin.cycles_page"))
+
+        row = {
+            "cycle_id": new_cycle.cycle_id,
+            "name": new_cycle.name,
+            "start_day": new_cycle.start_day.isoformat(),
+            "end_day": new_cycle.end_day.isoformat(),
+            "created_at": new_cycle.created_at.isoformat(),
+            "active": new_cycle.active,
+        }
+        append_row(data_path("cycles.json"), row)
+
+        flash(f"Created cycle: {new_cycle.cycle_id}", "success")
         return redirect(url_for("admin.cycles_page"))
 
     cycles = get_cycles_for_list()
