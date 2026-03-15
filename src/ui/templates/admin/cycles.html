@@ -33,7 +33,38 @@
 
 <h3>Create Cycle</h3>
 
-<p>Cycle creation form will appear here in the next block.</p>
+<form method="post" action="#">
+  <div>
+    <label for="season">Season</label><br>
+    <select id="season" name="season">
+      <option value="spring">Spring</option>
+      <option value="summer">Summer</option>
+      <option value="fall">Fall</option>
+      <option value="winter">Winter</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="year">Year</label><br>
+    <input id="year" name="year" type="number" min="2025" max="2100">
+  </div>
+
+  <div>
+    <label for="start_day">Start Day</label><br>
+    <input id="start_day" name="start_day" type="date">
+  </div>
+
+  <div>
+    <label for="end_day">End Day</label><br>
+    <input id="end_day" name="end_day" type="date">
+  </div>
+
+  <div>
+    <button type="submit">Create Cycle</button>
+  </div>
+</form>
+
+<p>This form will be connected in the next block.</p>
 
 {% include "admin/partials/two_panel_end.html" %}
 
