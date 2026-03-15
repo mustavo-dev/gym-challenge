@@ -3,30 +3,44 @@
 {% block content %}
 <h2>Submit Daily Score</h2>
 
-<form>
+{% if submit_message %}
+  <p><strong>{{ submit_message }}</strong></p>
+{% endif %}
+
+{% if active_cycle %}
+  <p><strong>Current Cycle:</strong> {{ active_cycle.name }}</p>
+{% endif %}
+
+<form method="post">
   <div>
-    <label for="participant">Participant</label>
-    <select id="participant" name="participant">
-      <option>Participant list will appear here later</option>
+    <label for="participant_id">Participant</label>
+    <select id="participant_id" name="participant_id" {% if not submit_enabled %}disabled{% endif %}>
+      <option value="">Select a participant</option>
+      {% for participant in participant_choices %}
+        <option value="{{ participant.participant_id }}">
+          {{ participant.display_name }}
+        </option>
+      {% endfor %}
     </select>
   </div>
 
   <div>
     <label for="points">Daily Score</label>
-    <select id="points" name="points">
-      <option>-3</option>
-      <option>-2</option>
-      <option>-1</option>
-      <option>0</option>
-      <option>1</option>
-      <option>2</option>
-      <option>3</option>
-      <option>4</option>
-      <option>5</option>
+    <select id="points" name="points" {% if not submit_enabled %}disabled{% endif %}>
+      <option value="">Select points</option>
+      <option value="-3">-3</option>
+      <option value="-2">-2</option>
+      <option value="-1">-1</option>
+      <option value="0">0</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
     </select>
   </div>
 
-  <button type="submit">Submit Score</button>
+  <button type="submit" {% if not submit_enabled %}disabled{% endif %}>Submit Score</button>
 </form>
 
 <hr>
@@ -72,4 +86,5 @@
   </p>
 </section>
 
-{% endblock %}
+{% endblock %}O
+
