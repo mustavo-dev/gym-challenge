@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any
 
-from gymchallenge.id_ops import new_membership_event_id
-from gymchallenge.storage_ops import append_row
+from .id_ops import new_membership_event_id
+from .storage_ops import append_row
 
 
 def append_membership_event(

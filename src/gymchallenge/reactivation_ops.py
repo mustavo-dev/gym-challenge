@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import date
 from typing import Dict
 
-from gymchallenge.models import Membership
-from gymchallenge.scoring_engine import DailyScore
+from .models import Membership
+from .scoring_engine import DailyScore
 
 
 def detect_auto_reactivate(

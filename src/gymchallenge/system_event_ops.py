@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import datetime, date
 from typing import Any
 
-from gymchallenge.membership_event_store import has_matching_event
-from gymchallenge.membership_event_ops import append_membership_event
+from .membership_event_store import has_matching_event
+from .membership_event_ops import append_membership_event
 
 
 def append_missing_auto_inactive_events(
