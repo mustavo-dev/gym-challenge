@@ -19,6 +19,10 @@ def get_memberships_for_list() -> list[dict[str, Any]]:
     """Return membership rows formatted for admin list display."""
     participant_rows = load_list(data_path("participants.json"))
     display_name_map = build_display_name_map(participant_rows)
+    archived_map = {
+        row["participant_id"]: bool(row.get("archived", False))
+        for row in participant_rows
+    }
 
     membership_rows = load_list(data_path("memberships.json"))
     memberships = load_memberships(membership_rows)
@@ -33,6 +37,8 @@ def get_memberships_for_list() -> list[dict[str, Any]]:
     for membership in memberships:
         joined_at = membership.joined_at.isoformat() if membership.joined_at else ""
         left_at = membership.left_at.isoformat() if membership.left_at else ""
+        if archived_map.get(membership.participant_id, False):
+            continue
 
         cycle = cycle_map.get(membership.cycle_id)
         cycle_status_label = cycle_status(cycle, now, BERLIN).title() if cycle else "Unknown"
