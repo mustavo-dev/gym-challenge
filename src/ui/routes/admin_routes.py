@@ -77,10 +77,15 @@ def participants_page():
 def memberships_page():
     """Render the admin memberships page."""
     memberships = get_memberships_for_list()
+    participant_choices = get_participant_choices()
+    cycle_choices = get_cycles_for_list()
+
     return render_template(
         "admin/memberships.html",
         page_title="Memberships",
         memberships=memberships,
+        participant_choices=participant_choices,
+        cycle_choices=cycle_choices,
     )
 
 

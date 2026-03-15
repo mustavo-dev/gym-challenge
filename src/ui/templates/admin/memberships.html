@@ -35,9 +35,37 @@
 
 {% include "admin/partials/two_panel_switch.html" %}
 
-<h3>Add Membership</h3>
+<h3>Add Member to Cycle</h3>
 
-<p>Membership action form will appear here in the next block.</p>
+<form method="post" action="#">
+  <div>
+    <label for="cycle_id">Cycle</label><br>
+    <select id="cycle_id" name="cycle_id">
+      <option value="">Select a cycle</option>
+      {% for cycle in cycle_choices %}
+        <option value="{{ cycle.cycle_id }}">
+          {{ cycle.name }} ({{ cycle.cycle_id }})
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label for="participant_id">Participant</label><br>
+    <select id="participant_id" name="participant_id">
+      <option value="">Select a participant</option>
+      {% for participant in participant_choices %}
+        <option value="{{ participant.participant_id }}">
+          {{ participant.display_name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <button type="submit">Add Member to Cycle</button>
+  </div>
+</form>
 
 {% include "admin/partials/two_panel_end.html" %}
 
