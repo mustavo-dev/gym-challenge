@@ -33,10 +33,16 @@
 
 <h3>Add Correction</h3>
 
-<form method="post" action="#">
   <div>
     <label for="participant_id">Participant</label><br>
-    <input id="participant_id" name="participant_id" type="text" placeholder="participant-id">
+    <select id="participant_id" name="participant_id">
+      <option value="">Select a participant</option>
+      {% for participant in participant_choices %}
+        <option value="{{ participant.participant_id }}">
+          {{ participant.display_name }}
+        </option>
+      {% endfor %}
+    </select>
   </div>
 
   <div>

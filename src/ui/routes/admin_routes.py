@@ -2,7 +2,7 @@
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 
-from src.ui.services.participant_admin_service import get_participants_for_list
+from src.ui.services.participant_admin_service import get_participants_for_list, get_participant_choices
 from src.ui.services.membership_ui_service import get_memberships_for_list
 from src.ui.services.cycle_ui_service import get_cycles_for_list
 from src.ui.services.submission_ui_service import get_submissions_for_list
@@ -100,10 +100,13 @@ def submissions_page():
 def corrections_page():
     """Render the admin corrections page."""
     corrections = get_corrections_for_list()
+    participant_choices = get_participant_choices()
+
     return render_template(
         "admin/corrections.html",
         page_title="Corrections",
         corrections=corrections,
+        participant_choices=participant_choices,
         total=len(corrections),
     )
 

@@ -32,3 +32,22 @@ def get_participants_for_list() -> list[dict[str, Any]]:
 
     participants.sort(key=lambda p: p["display_name"].lower())
     return participants
+
+def get_participant_choices() -> list[dict[str, str]]:
+    """Return participants formatted for admin dropdown choices."""
+    participant_rows = load_list(data_path("participants.json"))
+    display_name_map = build_display_name_map(participant_rows)
+
+    items: list[dict[str, str]] = []
+
+    for row in participant_rows:
+        participant_id = row["participant_id"]
+        items.append(
+            {
+                "participant_id": participant_id,
+                "display_name": display_name_map.get(participant_id, participant_id),
+            }
+        )
+
+    items.sort(key=lambda item: item["display_name"].lower())
+    return items
