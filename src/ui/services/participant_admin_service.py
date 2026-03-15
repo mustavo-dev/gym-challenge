@@ -71,3 +71,28 @@ def filter_participants_for_view(
         for row in participants
         if term in row.get("display_name", "").lower()
     ]
+
+def get_all_participant_choices_for_system() -> list[dict[str, str]]:
+    """Return all participants, including archived ones, for system maintenance tools."""
+    participant_rows = load_list(data_path("participants.json"))
+    display_name_map = build_display_name_map(participant_rows)
+
+    items: list[dict[str, str]] = []
+
+    for row in participant_rows:
+        participant_id = row["participant_id"]
+        archived = bool(row.get("archived", False))
+
+        display_name = display_name_map.get(participant_id, participant_id)
+        if archived:
+            display_name = f"{display_name} [Archived]"
+
+        items.append(
+            {
+                "participant_id": participant_id,
+                "display_name": display_name,
+            }
+        )
+
+    items.sort(key=lambda item: item["display_name"].lower())
+    return items

@@ -107,3 +107,21 @@ form[method="get"] input[type="text"] {
   padding: 1rem;
   border: 1px solid #ccc;
 }
+
+.system-confirm-options {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.system-confirm-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.system-confirm-options input[type="radio"] {
+  margin: 0;
+}

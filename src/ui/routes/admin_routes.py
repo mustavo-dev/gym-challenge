@@ -2,7 +2,7 @@
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 
-from src.ui.services.participant_admin_service import get_participants_for_list, get_participant_choices, filter_participants_for_view
+from src.ui.services.participant_admin_service import get_participants_for_list, get_participant_choices, filter_participants_for_view, get_all_participant_choices_for_system
 from src.ui.services.membership_ui_service import get_memberships_for_list, filter_memberships_for_view
 from src.ui.services.cycle_ui_service import get_cycles_for_list, find_cycle_id_for_score_day
 from src.ui.services.submission_ui_service import get_submissions_for_list, filter_and_sort_submissions_for_view
@@ -472,7 +472,7 @@ def system_page():
         flash("Unsupported system action.", "error")
         return redirect(url_for("admin.system_page"))
 
-    participant_choices = get_participant_choices()
+    participant_choices = get_all_participant_choices_for_system()
 
     return render_template(
         "admin/system.html",
