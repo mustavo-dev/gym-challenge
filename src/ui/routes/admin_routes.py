@@ -73,9 +73,53 @@ def participants_page():
     )
 
 
-@admin_bp.get("/admin/memberships")
+@admin_bp.route("/admin/memberships", methods=["GET", "POST"])
 def memberships_page():
-    """Render the admin memberships page."""
+    if request.method == "POST":
+        cycle_id = request.form.get("cycle_id", "").strip()
+        participant_id = request.form.get("participant_id", "").strip()
+
+        if not (cycle_id and participant_id):
+            flash("Cycle and participant are required.", "error")
+            return redirect(url_for("admin.memberships_page"))
+
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+
+        from src.gymchallenge.data_paths import data_path
+        from src.gymchallenge.storage_json import load_list
+        from src.gymchallenge.storage_ops import append_row
+        from src.gymchallenge.membership_store import find_membership_index
+
+        BERLIN = ZoneInfo("Europe/Berlin")
+
+        path = data_path("memberships.json")
+        rows = load_list(path)
+
+        existing_index = find_membership_index(
+            rows,
+            cycle_id=cycle_id,
+            participant_id=participant_id,
+        )
+        if existing_index is not None:
+            flash("Participant is already a member of that cycle.", "error")
+            return redirect(url_for("admin.memberships_page"))
+
+        row = {
+            "cycle_id": cycle_id,
+            "participant_id": participant_id,
+            "active_in_cycle": True,
+            "joined_at": datetime.now(BERLIN).isoformat(),
+            "left_at": None,
+            "inactive_reason": None,
+            "inactive_effective_score_day": None,
+        }
+
+        append_row(path, row)
+
+        flash("Member successfully added to cycle.", "success")
+        return redirect(url_for("admin.memberships_page"))
+
     memberships = get_memberships_for_list()
     participant_choices = get_participant_choices()
     cycle_choices = get_cycles_for_list()
