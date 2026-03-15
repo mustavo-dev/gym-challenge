@@ -20,11 +20,40 @@
     <hr>
 
     <h3>Archive / Restore Participant</h3>
-    <p>
-      This tool will later allow Jayme to archive participants without deleting historical
-      records, and restore them if needed.
-    </p>
-    <p><em>Not wired yet.</em></p>
+
+    <form method="post" action="#">
+      <div>
+        <label for="participant_id">Participant</label><br>
+        <select id="participant_id" name="participant_id">
+          <option value="">Select a participant</option>
+          {% for participant in participant_choices %}
+            <option value="{{ participant.participant_id }}">
+              {{ participant.display_name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="margin-top: 0.75rem;">
+        <button type="button">Archive Participant</button>
+        <button type="button">Restore Participant</button>
+      </div>
+    </form>
+
+    <div class="system-warning-box">
+      <p><strong>Archive Warning</strong></p>
+      <p>
+        Archiving a participant removes them from normal system usage and active dropdowns,
+        but preserves their historical records, memberships, submissions, corrections,
+        and reporting history.
+      </p>
+      <div>
+        <button type="button">OK</button>
+        <button type="button">Cancel</button>
+      </div>
+    </div>
+
+    <p><em>Archive / restore behavior not wired yet.</em></p>
 
     <hr>
 

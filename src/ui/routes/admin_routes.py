@@ -425,9 +425,13 @@ def reports_page():
 
 @admin_bp.get("/admin/system")
 def system_page():
+    """Render the admin system page."""
+    participant_choices = get_participant_choices()
+
     return render_template(
         "admin/system.html",
         page_title="System",
+        participant_choices=participant_choices,
     )
 
 
