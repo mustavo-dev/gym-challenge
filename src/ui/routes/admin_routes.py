@@ -58,6 +58,7 @@ def participants_page():
             "last_name": last,
             "created_at": datetime.now(BERLIN).isoformat(),
             "active": True,
+            "archived": False,
         }
 
         append_row(path, row)
@@ -423,9 +424,54 @@ def reports_page():
         cycle_choices=cycle_choices,
     )
 
-@admin_bp.get("/admin/system")
+@admin_bp.route("/admin/system", methods=["GET", "POST"])
 def system_page():
-    """Render the admin system page."""
+    """Render and process the admin system page."""
+    from src.gymchallenge.data_paths import data_path
+    from src.gymchallenge.storage_json import load_list, save_list
+    from src.gymchallenge.participant_store import (
+        archive_participant_row,
+        restore_participant_row,
+    )
+
+    if request.method == "POST":
+        participant_id = request.form.get("participant_id", "").strip()
+        action = request.form.get("action", "").strip()
+        confirm_archive = request.form.get("confirm_archive", "").strip()
+
+        if not participant_id:
+            flash("Participant selection is required.", "error")
+            return redirect(url_for("admin.system_page"))
+
+        participant_rows = load_list(data_path("participants.json"))
+
+        if action == "archive":
+            if confirm_archive != "yes":
+                flash("Archive cancelled. Confirmation was not accepted.", "error")
+                return redirect(url_for("admin.system_page"))
+
+            changed = archive_participant_row(participant_rows, participant_id)
+            if not changed:
+                flash("Participant was not found.", "error")
+                return redirect(url_for("admin.system_page"))
+
+            save_list(data_path("participants.json"), participant_rows)
+            flash("Participant archived successfully.", "success")
+            return redirect(url_for("admin.system_page"))
+
+        if action == "restore":
+            changed = restore_participant_row(participant_rows, participant_id)
+            if not changed:
+                flash("Participant was not found.", "error")
+                return redirect(url_for("admin.system_page"))
+
+            save_list(data_path("participants.json"), participant_rows)
+            flash("Participant restored successfully.", "success")
+            return redirect(url_for("admin.system_page"))
+
+        flash("Unsupported system action.", "error")
+        return redirect(url_for("admin.system_page"))
+
     participant_choices = get_participant_choices()
 
     return render_template(

@@ -21,7 +21,7 @@
 
     <h3>Archive / Restore Participant</h3>
 
-    <form method="post" action="#">
+    <form method="post">
       <div>
         <label for="participant_id">Participant</label><br>
         <select id="participant_id" name="participant_id">
@@ -35,25 +35,36 @@
       </div>
 
       <div style="margin-top: 0.75rem;">
-        <button type="button">Archive Participant</button>
-        <button type="button">Restore Participant</button>
+        <button type="submit" name="action" value="archive">Archive Participant</button>
+        <button type="submit" name="action" value="restore">Restore Participant</button>
+      </div>
+
+      <div class="system-warning-box">
+        <p><strong>Archive Warning</strong></p>
+        <p>
+          Archiving a participant removes them from normal system usage and active dropdowns,
+          but preserves their historical records, memberships, submissions, corrections,
+          and reporting history.
+        </p>
+
+        <p>
+          To confirm archive, select OK below before pressing Archive Participant.
+        </p>
+
+        <div>
+          <label>
+            <input type="radio" name="confirm_archive" value="yes">
+            OK
+          </label>
+          <label style="margin-left: 1rem;">
+            <input type="radio" name="confirm_archive" value="no" checked>
+            Cancel
+          </label>
+        </div>
       </div>
     </form>
 
-    <div class="system-warning-box">
-      <p><strong>Archive Warning</strong></p>
-      <p>
-        Archiving a participant removes them from normal system usage and active dropdowns,
-        but preserves their historical records, memberships, submissions, corrections,
-        and reporting history.
-      </p>
-      <div>
-        <button type="button">OK</button>
-        <button type="button">Cancel</button>
-      </div>
-    </div>
-
-    <p><em>Archive / restore behavior not wired yet.</em></p>
+    <p><em>Archive / restore behavior now wired.</em></p>
 
     <hr>
 

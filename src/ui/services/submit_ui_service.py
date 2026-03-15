@@ -18,6 +18,11 @@ def get_submit_page_context() -> dict:
     membership_rows = load_list(data_path("memberships.json"))
     participant_rows = load_list(data_path("participants.json"))
 
+    archived_map = {
+        row["participant_id"]: bool(row.get("archived", False))
+        for row in participant_rows
+    }
+
     cycles = load_cycles(cycle_rows)
     memberships = load_memberships(membership_rows)
     display_name_map = build_display_name_map(participant_rows)
@@ -52,6 +57,9 @@ def get_submit_page_context() -> dict:
     for membership in cycle_memberships:
         participant_id = membership.participant_id
         if participant_id in seen_ids:
+            continue
+
+        if archived_map.get(participant_id, False):
             continue
 
         participant_choices.append(

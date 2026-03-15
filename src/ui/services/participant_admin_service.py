@@ -20,6 +20,8 @@ def get_participants_for_list() -> list[dict[str, Any]]:
         participant_id = row["participant_id"]
         created_at = row.get("created_at", "")
         created_display = created_at[:10] if created_at else ""
+        if row.get("archived", False):
+            continue
 
         participants.append(
             {
@@ -42,6 +44,8 @@ def get_participant_choices() -> list[dict[str, str]]:
 
     for row in participant_rows:
         participant_id = row["participant_id"]
+        if row.get("archived", False):
+            continue
         items.append(
             {
                 "participant_id": participant_id,
