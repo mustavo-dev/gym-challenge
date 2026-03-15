@@ -53,6 +53,9 @@ def get_history_for_list() -> list[dict[str, str]]:
         elif event_type == "participant_restored":
             entry_type = "System"
             event_label = "Participant restored"
+        elif event_type == "dataset_reset":
+            entry_type = "System"
+            event_label = "Dataset reset"
         else:
             entry_type = "System"
             event_label = event_type.replace("_", " ").title()
@@ -62,7 +65,7 @@ def get_history_for_list() -> list[dict[str, str]]:
                 "entry_type": entry_type,
                 "entry_type_key": "system",
                 "participant_id": participant_id,
-                "display_name": display_name_map.get(participant_id, participant_id or "System"),
+                "display_name": display_name_map.get(participant_id, participant_id) if participant_id else "System",
                 "event_label": event_label,
                 "date_label": created_at.strftime("%Y-%m-%d %H:%M%z"),
                 "date_raw": created_at.isoformat(),

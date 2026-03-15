@@ -437,6 +437,45 @@ def system_page():
         restore_participant_row,
     )
 
+    action = request.form.get("action", "").strip()
+
+    if action == "reset_dataset":
+        reset_confirmation = request.form.get("reset_confirmation", "").strip()
+
+        if reset_confirmation != "RESET":
+            flash("Dataset reset cancelled. Type RESET exactly to confirm.", "error")
+            return redirect(url_for("admin.system_page"))
+
+        from datetime import datetime
+        from src.gymchallenge.id_ops import new_system_event_id
+        from src.gymchallenge.storage_json import save_list
+
+        timestamp = datetime.now().astimezone().isoformat()
+
+        save_list(data_path("participants.json"), [])
+        save_list(data_path("memberships.json"), [])
+        save_list(data_path("membership_events.json"), [])
+        save_list(data_path("submissions.json"), [])
+        save_list(data_path("corrections.json"), [])
+        save_list(data_path("cycles.json"), [])
+
+        save_list(
+            data_path("system_events.json"),
+            [
+                {
+                    "event_id": new_system_event_id(),
+                    "event_type": "dataset_reset",
+                    "participant_id": None,
+                    "reason": "system reset via admin UI",
+                    "created_at": timestamp,
+                    "actor": "jayme",
+                }
+            ],
+        )
+
+        flash("Dataset reset successfully.", "success")
+        return redirect(url_for("admin.system_page"))
+
     if request.method == "POST":
         participant_id = request.form.get("participant_id", "").strip()
         action = request.form.get("action", "").strip()

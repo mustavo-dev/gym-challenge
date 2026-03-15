@@ -11,11 +11,42 @@
 <div class="admin-two-panel">
   <section class="admin-panel admin-panel-left">
     <h3>Reset Dataset</h3>
-    <p>
-      This tool will later reset all local dataset files back to an empty starting state.
-      It will be used before full workflow validation and before handing the system to Jayme.
-    </p>
-    <p><em>Not wired yet.</em></p>
+
+    <form method="post">
+      <input type="hidden" name="action" value="reset_dataset">
+
+      <p>
+        This will completely erase all current participants, cycles, memberships,
+        submissions, corrections, and history, then reinitialize the dataset
+        to a clean starting state.
+      </p>
+
+      <div class="system-warning-box">
+        <p><strong>Reset Warning</strong></p>
+        <p>
+          This action is destructive and intended only for deliberate clean-start testing
+          or first-time deployment preparation.
+        </p>
+
+        <p>
+          Type <strong>RESET</strong> below to enable the reset action.
+        </p>
+
+        <div>
+          <label for="reset_confirmation">Confirmation</label><br>
+          <input
+            id="reset_confirmation"
+            name="reset_confirmation"
+            type="text"
+            placeholder="Type RESET"
+          >
+        </div>
+
+        <div style="margin-top: 0.75rem;">
+          <button type="submit">Confirm Reset</button>
+        </div>
+      </div>
+    </form>
 
     <hr>
 
