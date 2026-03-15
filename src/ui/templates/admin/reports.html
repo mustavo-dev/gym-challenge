@@ -6,6 +6,44 @@
 
 <h2>Reports</h2>
 
-<p>Report management will appear here.</p>
+<p>Generate downloadable challenge reports for Jayme.</p>
+
+<div class="admin-panel">
+  <h3>Generate Report</h3>
+
+  <form method="post" action="#">
+    <div>
+      <label for="cycle_id">Cycle</label><br>
+      <select id="cycle_id" name="cycle_id">
+        <option value="">Select a cycle</option>
+        {% for cycle in cycle_choices %}
+          <option value="{{ cycle.cycle_id }}">
+            {{ cycle.name }} ({{ cycle.cycle_id }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label for="report_type">Report Type</label><br>
+      <select id="report_type" name="report_type">
+        <option value="leaderboard">Leaderboard</option>
+      </select>
+    </div>
+
+    <div>
+      <label>
+        <input type="checkbox" name="include_inactive" value="1">
+        Include inactive members
+      </label>
+    </div>
+
+    <div>
+      <button type="submit">Generate Report</button>
+    </div>
+  </form>
+
+  <p>This report form will be connected in the next block.</p>
+</div>
 
 {% endblock %}

@@ -291,9 +291,13 @@ def cycles_page():
 
 @admin_bp.get("/admin/reports")
 def reports_page():
+    """Render the admin reports page."""
+    cycle_choices = get_cycles_for_list()
+
     return render_template(
         "admin/reports.html",
         page_title="Reports",
+        cycle_choices=cycle_choices,
     )
 
 
