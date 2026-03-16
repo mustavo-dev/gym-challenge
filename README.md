@@ -445,6 +445,44 @@ This tooling is intended strictly for development and testing environments.
 
 ---
 
+## Development Environment Setup
+
+This project uses a Python virtual environment to avoid conflicts with
+system Python packages (required on modern Debian/Ubuntu/WSL systems
+due to PEP 668).
+
+### 1. Create virtual environment
+
+cd ~/projects/client-work/gym-challenge
+
+python3 -m venv .venv
+
+### 2. Activate environment
+
+source .venv/bin/activate
+
+You should now see:
+
+(.venv) mustavo@machine:~/projects/client-work/gym-challenge$
+
+### 3. Install dependencies
+
+pip install -r requirements.txt
+
+### 4. Run the application
+
+python app.py
+
+or
+
+flask run
+
+### 5. Verify Flask installation
+
+python -c "import flask; print('Flask OK')"
+
+---
+
 # Future Development
 
 Planned expansions:
