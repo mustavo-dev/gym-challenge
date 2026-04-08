@@ -86,7 +86,11 @@ def submit_page():
 
         append_row(data_path("submissions.json"), row)
 
-        flash("Score submitted successfully.", "success")
+        recorded_display = now.strftime("%Y-%m-%d %H:%M %Z")
+        flash(
+            f"Score submitted successfully. Recorded at: {recorded_display}",
+            "success",
+        )
         return redirect(url_for(".submit_page", success="1"))
 
     auto_reset_success = request.args.get("success") == "1"
