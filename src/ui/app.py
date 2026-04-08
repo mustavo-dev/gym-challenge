@@ -10,6 +10,7 @@ def create_app() -> Flask:
     """Create and configure the Flask application for the UI layer."""
     app = Flask(__name__)
     app.secret_key = "dev-secret-key"
+    app.config.setdefault("CHALLENGE_NAME", "gym-challenge")
 
     app.register_blueprint(participant_bp)
     app.register_blueprint(admin_bp)
