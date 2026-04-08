@@ -237,9 +237,37 @@ def build_leaderboard(
             if e.cycle_id == m.cycle_id and e.participant_id == pid
         ]
 
+        synthetic_member_events = list(member_events)
+
+        if not m.active_in_cycle and m.inactive_effective_score_day is not None:
+            per_day = daily.get(pid, {})
+            d = max(from_day, m.inactive_effective_score_day)
+            reactivation_day = None
+
+            while d <= to_day:
+                day_score = per_day.get(d)
+                if day_score is not None and day_score.participated:
+                    reactivation_day = d
+                    break
+                d += timedelta(days=1)
+
+            if reactivation_day is not None:
+                synthetic_member_events.append(
+                    MembershipEvent(
+                        event_id="synthetic-auto-reactivate",
+                        cycle_id=m.cycle_id,
+                        participant_id=pid,
+                        event_type="auto_reactivate_submission",
+                        effective_score_day=reactivation_day,
+                        reason="valid submission reactivated member",
+                        created_at=m.joined_at,
+                        actor="system",
+                    )
+                )
+
         active_map = build_active_day_map(
             membership=m,
-            events=member_events,
+            events=synthetic_member_events,
             from_day=from_day,
             to_day=to_day,
             tz=tz,

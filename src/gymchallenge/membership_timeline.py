@@ -12,6 +12,13 @@ from .scoring_time import score_day_for_timestamp
 INACTIVE_EVENT_TYPES = {"auto_inactive", "manual_inactive"}
 ACTIVE_EVENT_TYPES = {"manual_reactivate", "auto_reactivate_submission"}
 
+def _event_priority(event_type: str) -> int:
+    """Inactive transitions apply first; reactivation can win later on the same day."""
+    if event_type in INACTIVE_EVENT_TYPES:
+        return 0
+    if event_type in ACTIVE_EVENT_TYPES:
+        return 1
+    return 0
 
 def build_active_day_map(
     membership: Membership,
@@ -28,13 +35,16 @@ def build_active_day_map(
     - Member stops being eligible on/after left_at score-day.
     - Inactive events make them inactive on/after effective_score_day.
     - Reactivate events make them active on/after effective_score_day.
-    - If multiple events occur, later effective_score_day transitions apply as the loop advances.
     """
     joined_sd = score_day_for_timestamp(membership.joined_at, tz)
     if joined_sd is None:
         joined_sd = from_day
 
     left_sd = None
+    if membership.left_at is not None:
+        left_sd = score_day_for_timestamp(membership.left_at, tz)
+        if left_sd is None:
+            left_sd = membership.left_at.astimezone(tz).date()
 
     synthetic_events = list(events)
 
@@ -56,31 +66,34 @@ def build_active_day_map(
         )
 
     relevant_events = sorted(
-        synthetic_events,
-        key=lambda e: (e.effective_score_day, e.created_at),
+       synthetic_events,
+        key=lambda e: (
+            e.effective_score_day,
+            _event_priority(e.event_type),
+            e.created_at,
+        ),
     )
 
     result: dict[date, bool] = {}
     current_active = True
-
     event_idx = 0
     d = from_day
 
     while d <= to_day:
-        # Before joined day => inactive
         if d < joined_sd:
             result[d] = False
             d += timedelta(days=1)
             continue
 
-        # On/after left day => inactive forever
         if left_sd is not None and d >= left_sd:
             result[d] = False
             d += timedelta(days=1)
             continue
 
-        # Apply all events effective on this day
-        while event_idx < len(relevant_events) and relevant_events[event_idx].effective_score_day == d:
+        while (
+            event_idx < len(relevant_events)
+            and relevant_events[event_idx].effective_score_day == d
+        ):
             evt = relevant_events[event_idx]
             if evt.event_type in INACTIVE_EVENT_TYPES:
                 current_active = False
