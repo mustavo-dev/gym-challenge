@@ -19,6 +19,9 @@ def create_app(instance_path: str | None = None) -> Flask:
 
     app.secret_key = "dev-secret-key"
     app.config.setdefault("CHALLENGE_NAME", "gym-challenge")
+    app.config.setdefault("GYM_NAME", "Default Gym")
+    app.config.setdefault("ADMIN_NAME", "Admin")
+    app.config.setdefault("GYM_TIMEZONE", "Europe/Berlin")
 
     try:
         app.config.from_pyfile("config.py")

@@ -54,6 +54,36 @@ class UiAppConfigTests(unittest.TestCase):
             html = response.data.decode("utf-8")
             self.assertIn("<h1>Instance Challenge</h1>", html)
 
+    def test_create_app_loads_additional_instance_config_values(self) -> None:
+        import os
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            instance_dir = os.path.join(tmpdir, "instance")
+            os.makedirs(instance_dir, exist_ok=True)
+
+            config_path = os.path.join(instance_dir, "config.py")
+            with open(config_path, "w", encoding="utf-8") as handle:
+                handle.write('CHALLENGE_NAME = "Instance Challenge"\n')
+                handle.write('GYM_NAME = "Test Gym"\n')
+                handle.write('ADMIN_NAME = "Jayme"\n')
+                handle.write('GYM_TIMEZONE = "Europe/Berlin"\n')
+
+            app = create_app(instance_path=instance_dir)
+            app.config["TESTING"] = True
+
+            self.assertEqual(app.config["CHALLENGE_NAME"], "Instance Challenge")
+            self.assertEqual(app.config["GYM_NAME"], "Test Gym")
+            self.assertEqual(app.config["ADMIN_NAME"], "Jayme")
+            self.assertEqual(app.config["GYM_TIMEZONE"], "Europe/Berlin")
+
+    def test_create_app_sets_default_additional_config_values(self) -> None:
+        app = create_app()
+        app.config["TESTING"] = True
+
+        self.assertEqual(app.config["GYM_NAME"], "Default Gym")
+        self.assertEqual(app.config["ADMIN_NAME"], "Admin")
+        self.assertEqual(app.config["GYM_TIMEZONE"], "Europe/Berlin")
 
 if __name__ == "__main__":
     unittest.main()
