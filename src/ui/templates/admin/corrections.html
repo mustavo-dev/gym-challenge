@@ -33,6 +33,24 @@
 
 <h3>Add Correction</h3>
 
+<form method="get">
+  <div>
+    <label for="score_day_filter">Score Day</label><br>
+    <input
+      id="score_day_filter"
+      name="score_day"
+      type="date"
+      value="{{ score_day_value }}"
+    >
+  </div>
+
+  <div>
+    <button type="submit">Load Eligible Participants</button>
+  </div>
+</form>
+
+<hr>
+
 <form method="post">
   <div>
     <label for="participant_id">Participant</label><br>
@@ -48,7 +66,7 @@
 
   <div>
     <label for="score_day">Score Day</label><br>
-    <input id="score_day" name="score_day" type="date">
+    <input id="score_day" name="score_day" type="date" value="{{ score_day_value }}">
   </div>
 
   <div>

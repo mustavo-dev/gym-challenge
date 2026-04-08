@@ -420,5 +420,22 @@ class UiAlphaRegressionTests(unittest.TestCase):
         self.assertIn("Member One", html)
         self.assertNotIn("Outsider One", html)
 
+    def test_corrections_page_preserves_score_day_and_shows_filter_form(self) -> None:
+        """Corrections page should preserve score_day and provide a GET filter path."""
+        with patch(
+            "src.ui.routes.admin_routes.get_corrections_for_list",
+            return_value=[],
+        ), patch(
+            "src.ui.routes.admin_routes.get_participant_choices",
+            return_value=[],
+        ):
+            response = self.client.get("/admin/corrections?score_day=2026-03-17")
+
+        self.assertEqual(response.status_code, 200)
+        html = response.data.decode("utf-8")
+        self.assertIn('method="get"', html)
+        self.assertIn('value="2026-03-17"', html)
+        self.assertIn("Load Eligible Participants", html)
+
 if __name__ == "__main__":
     unittest.main()

@@ -279,6 +279,7 @@ def corrections_page():
         corrections=corrections,
         participant_choices=participant_choices,
         total=len(corrections),
+        score_day_value=score_day_value,
     )
 
 
