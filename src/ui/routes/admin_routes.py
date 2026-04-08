@@ -343,7 +343,7 @@ def reports_page():
 
         import csv
         from io import StringIO
-        from datetime import datetime
+        from datetime import datetime, timedelta
         from zoneinfo import ZoneInfo
         from flask import Response
 
@@ -358,6 +358,7 @@ def reports_page():
         )
         from src.gymchallenge.display_names import build_display_name_map
         from src.gymchallenge.scoring_engine import compute_daily_scores, build_leaderboard
+        from src.gymchallenge.scoring_time import score_day_for_timestamp
 
         BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -386,6 +387,16 @@ def reports_page():
             if row.get("archived", False)
         }
 
+        report_to_day = selected_cycle.end_day
+        now = datetime.now(BERLIN)
+
+        if selected_cycle.start_day <= now.date() <= selected_cycle.end_day:
+            current_score_day = score_day_for_timestamp(now, BERLIN)
+            if current_score_day is None:
+                current_score_day = now.date() - timedelta(days=1)
+
+            report_to_day = min(selected_cycle.end_day, current_score_day)
+
         cycle_memberships = [m for m in memberships if m.cycle_id == cycle_id]
         participant_ids = sorted(
             {
@@ -400,7 +411,7 @@ def reports_page():
             submissions=submissions,
             tz=BERLIN,
             cycle_start=selected_cycle.start_day,
-            cycle_end=selected_cycle.end_day,
+            cycle_end=report_to_day,
             missing_points=-3,
             corrections=corrections,
         )
@@ -411,7 +422,7 @@ def reports_page():
             tz=BERLIN,
             daily=daily,
             from_day=selected_cycle.start_day,
-            to_day=selected_cycle.end_day,
+            to_day=report_to_day,
             include_inactive=include_inactive,
         )
 

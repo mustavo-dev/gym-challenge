@@ -220,5 +220,82 @@ class UiAlphaRegressionTests(unittest.TestCase):
         csv_text = response.data.decode("utf-8")
         self.assertEqual(csv_text.splitlines(), ["rank,display_name,total_points"])
 
+    def test_active_cycle_report_uses_elapsed_days_only(self) -> None:
+        """Active-cycle leaderboard reports should stop at the current score day."""
+        from datetime import date, datetime
+        from zoneinfo import ZoneInfo
+
+        selected_cycle = SimpleNamespace(
+            cycle_id="spring26",
+            start_day=date(2026, 3, 10),
+            end_day=date(2026, 3, 30),
+        )
+        membership = SimpleNamespace(
+            cycle_id="spring26",
+            participant_id="walker-luke-01",
+        )
+
+        fake_now = datetime(2026, 3, 16, 21, 0, tzinfo=ZoneInfo("Europe/Berlin"))
+
+        class FixedDateTime:
+            @classmethod
+            def now(cls, tz=None):
+                return fake_now if tz is not None else fake_now.replace(tzinfo=None)
+
+        with patch(
+            "datetime.datetime",
+            FixedDateTime,
+        ), patch(
+            "src.gymchallenge.data_paths.data_path",
+            return_value="/tmp/mock.json",
+        ), patch(
+            "src.gymchallenge.storage_json.load_list",
+            return_value=[],
+        ), patch(
+            "src.gymchallenge.loaders.load_cycles",
+            return_value=[selected_cycle],
+        ), patch(
+            "src.gymchallenge.loaders.load_memberships",
+            return_value=[membership],
+        ), patch(
+            "src.gymchallenge.loaders.load_membership_events",
+            return_value=[],
+        ), patch(
+            "src.gymchallenge.loaders.load_submissions",
+            return_value=[],
+        ), patch(
+            "src.gymchallenge.loaders.load_corrections",
+            return_value=[],
+        ), patch(
+            "src.gymchallenge.display_names.build_display_name_map",
+            return_value={"walker-luke-01": "Luke Walker"},
+        ), patch(
+            "src.gymchallenge.scoring_engine.compute_daily_scores",
+            return_value={},
+        ) as mock_compute_daily_scores, patch(
+            "src.gymchallenge.scoring_engine.build_leaderboard",
+            return_value=[("walker-luke-01", 9)],
+        ) as mock_build_leaderboard:
+            response = self.client.post(
+                "/admin/reports",
+                data={
+                    "cycle_id": "spring26",
+                    "report_type": "leaderboard",
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+
+        expected_to_day = date(2026, 3, 16)
+
+        self.assertEqual(
+            mock_compute_daily_scores.call_args.kwargs["cycle_end"],
+            expected_to_day,
+        )
+        self.assertEqual(
+            mock_build_leaderboard.call_args.kwargs["to_day"],
+            expected_to_day,
+        )
+
 if __name__ == "__main__":
     unittest.main()
