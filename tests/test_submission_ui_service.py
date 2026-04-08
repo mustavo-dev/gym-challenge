@@ -43,6 +43,70 @@ class SubmissionUiServiceTests(unittest.TestCase):
             ["sub-002", "sub-001"],
         )
 
+    def test_get_submissions_for_list_includes_raw_timestamp_key(self) -> None:
+        """Submission list rows should expose the raw timestamp key used by sorting."""
+        from datetime import datetime
+        from types import SimpleNamespace
+        from unittest.mock import patch
+
+        fake_submission = SimpleNamespace(
+            submission_id="sub-001",
+            participant_id="alpha-01",
+            submitted_at=datetime.fromisoformat("2026-03-16T20:05:00+01:00"),
+            points=3,
+            source="ui",
+        )
+
+        with patch(
+            "src.ui.services.submission_ui_service.load_list",
+            side_effect=[[], []],
+        ), patch(
+            "src.ui.services.submission_ui_service.load_submissions",
+            return_value=[fake_submission],
+        ), patch(
+            "src.ui.services.submission_ui_service.build_display_name_map",
+            return_value={"alpha-01": "Alpha"},
+        ):
+            from src.ui.services.submission_ui_service import get_submissions_for_list
+
+            rows = get_submissions_for_list()
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn("submitted_at_raw", rows[0])
+        self.assertEqual(rows[0]["submitted_at_raw"], "2026-03-16T20:05:00+01:00")
+
+    def test_get_submissions_for_list_includes_score_day(self) -> None:
+        """Submission rows should expose the derived score day for admin auditability."""
+        from datetime import datetime
+        from types import SimpleNamespace
+        from unittest.mock import patch
+
+        fake_submission = SimpleNamespace(
+            submission_id="sub-001",
+            participant_id="alpha-01",
+            submitted_at=datetime.fromisoformat("2026-03-16T08:05:00+01:00"),
+            points=3,
+            source="ui",
+        )
+
+        with patch(
+            "src.ui.services.submission_ui_service.load_list",
+            side_effect=[[], []],
+        ), patch(
+            "src.ui.services.submission_ui_service.load_submissions",
+            return_value=[fake_submission],
+        ), patch(
+            "src.ui.services.submission_ui_service.build_display_name_map",
+            return_value={"alpha-01": "Alpha"},
+        ):
+            from src.ui.services.submission_ui_service import get_submissions_for_list
+
+            rows = get_submissions_for_list()
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn("score_day", rows[0])
+        self.assertEqual(rows[0]["score_day"], "2026-03-15")
+
 
 if __name__ == "__main__":
     unittest.main()

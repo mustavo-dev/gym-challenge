@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from src.gymchallenge.data_paths import data_path
 from src.gymchallenge.display_names import build_display_name_map
 from src.gymchallenge.loaders import load_submissions
 from src.gymchallenge.storage_json import load_list
+from src.gymchallenge.scoring_time import score_day_for_timestamp
 
 
 def get_submissions_for_list() -> list[dict[str, Any]]:
     """Return submission rows formatted for admin list display."""
+    BERLIN = ZoneInfo("Europe/Berlin")
     participant_rows = load_list(data_path("participants.json"))
     display_name_map = build_display_name_map(participant_rows)
 
@@ -38,6 +41,7 @@ def get_submissions_for_list() -> list[dict[str, Any]]:
                 "show_participant_id": name_counts.get(display_name, 0) > 1,
                 "submitted_display": submission.submitted_at.isoformat(sep=" ", timespec="minutes"),
                 "submitted_at_raw": submission.submitted_at.isoformat(),
+                "score_day": score_day_for_timestamp(submission.submitted_at, BERLIN).isoformat(),
                 "points": submission.points,
                 "source": submission.source,
             }
