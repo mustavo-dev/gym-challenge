@@ -97,5 +97,17 @@ class UiAppConfigTests(unittest.TestCase):
         html = response.data.decode("utf-8")
         self.assertIn("Gym: Test Gym", html)
 
+    def test_admin_dashboard_shows_configured_admin_name(self) -> None:
+        app = create_app()
+        app.config["TESTING"] = True
+        app.config["ADMIN_NAME"] = "Jayme"
+
+        client = app.test_client()
+        response = client.get("/admin")
+
+        self.assertEqual(response.status_code, 200)
+        html = response.data.decode("utf-8")
+        self.assertIn("Admin: Jayme", html)
+
 if __name__ == "__main__":
     unittest.main()
