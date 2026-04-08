@@ -57,6 +57,10 @@ def submit_page():
         active_cycle = context["active_cycle"]
         score_day = score_day_for_timestamp(now, BERLIN)
 
+        if score_day is None:
+            flash("Submissions are only accepted during the active scoring window.", "error")
+            return redirect(url_for(".submit_page"))
+
         existing_rows = load_list(data_path("submissions.json"))
         existing_submissions = load_submissions(existing_rows)
 
