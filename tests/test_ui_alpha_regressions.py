@@ -149,5 +149,76 @@ class UiAlphaRegressionTests(unittest.TestCase):
         self.assertEqual(header, "rank,display_name,total_points")
         self.assertNotIn("walker-luke-01", csv_text)
 
+    def test_leaderboard_report_excludes_archived_participants(self) -> None:
+        """Leaderboard CSV should exclude archived participants."""
+        from datetime import date
+
+        selected_cycle = SimpleNamespace(
+            cycle_id="spring26",
+            start_day=date(2026, 3, 10),
+            end_day=date(2026, 3, 30),
+        )
+        membership = SimpleNamespace(
+            cycle_id="spring26",
+            participant_id="walker-luke-01",
+        )
+
+        with patch(
+            "src.gymchallenge.data_paths.data_path",
+            return_value="/tmp/mock.json",
+        ), patch(
+            "src.gymchallenge.storage_json.load_list",
+            side_effect=[
+                [],  # cycles.json
+                [],  # memberships.json
+                [],  # membership_events.json
+                [],  # submissions.json
+                [],  # corrections.json
+                [
+                    {
+                        "participant_id": "walker-luke-01",
+                        "first_name": "Luke",
+                        "last_name": "Walker",
+                        "archived": True,
+                    }
+                ],  # participants.json
+            ],
+        ), patch(
+            "src.gymchallenge.loaders.load_cycles",
+            return_value=[selected_cycle],
+        ), patch(
+            "src.gymchallenge.loaders.load_memberships",
+            return_value=[membership],
+        ), patch(
+            "src.gymchallenge.loaders.load_membership_events",
+            return_value=[],
+        ), patch(
+            "src.gymchallenge.loaders.load_submissions",
+            return_value=[],
+        ), patch(
+            "src.gymchallenge.loaders.load_corrections",
+            return_value=[],
+        ), patch(
+            "src.gymchallenge.display_names.build_display_name_map",
+            return_value={"walker-luke-01": "Luke Walker"},
+        ), patch(
+            "src.gymchallenge.scoring_engine.compute_daily_scores",
+            return_value={},
+        ), patch(
+            "src.gymchallenge.scoring_engine.build_leaderboard",
+            return_value=[("walker-luke-01", 9)],
+        ):
+            response = self.client.post(
+                "/admin/reports",
+                data={
+                    "cycle_id": "spring26",
+                    "report_type": "leaderboard",
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        csv_text = response.data.decode("utf-8")
+        self.assertEqual(csv_text.splitlines(), ["rank,display_name,total_points"])
+
 if __name__ == "__main__":
     unittest.main()

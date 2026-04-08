@@ -380,9 +380,20 @@ def reports_page():
             return redirect(url_for("admin.reports_page"))
 
         display_name_map = build_display_name_map(participant_rows)
+        archived_participant_ids = {
+            row["participant_id"]
+            for row in participant_rows
+            if row.get("archived", False)
+        }
 
         cycle_memberships = [m for m in memberships if m.cycle_id == cycle_id]
-        participant_ids = sorted({m.participant_id for m in cycle_memberships})
+        participant_ids = sorted(
+            {
+                m.participant_id
+                for m in cycle_memberships
+                if m.participant_id not in archived_participant_ids
+            }
+        )
 
         daily = compute_daily_scores(
             participant_ids=participant_ids,
@@ -408,7 +419,13 @@ def reports_page():
         writer = csv.writer(output)
         writer.writerow(["rank", "display_name", "total_points"])
 
-        for rank, (participant_id, total_points) in enumerate(leaderboard, start=1):
+        visible_leaderboard = [
+            (participant_id, total_points)
+            for participant_id, total_points in leaderboard
+            if participant_id not in archived_participant_ids
+        ]
+
+        for rank, (participant_id, total_points) in enumerate(visible_leaderboard, start=1):
             writer.writerow(
                 [
                     rank,
