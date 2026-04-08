@@ -1,5 +1,11 @@
 # gym-challenge
 
+**Current Version:** 1.1.0-dev  
+**Current Status:** Post-alpha repair and stabilization cycle
+
+v1.0 was the original alpha-tested baseline.  
+v1.1 is the active repair cycle focused on correctness, visibility, testing, and config groundwork before the next 7-day local QA run.
+
 Private Python CLI system for managing a recurring gym nutrition / participation challenge.
 
 The system tracks participants, submissions, corrections, memberships, and membership events across seasonal challenge cycles. It enforces participation rules automatically, maintains historical state transitions, and generates leaderboard reports.
