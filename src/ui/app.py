@@ -18,6 +18,9 @@ def create_app() -> Flask:
     @app.get("/")
     def home() -> str:
         """Render the shared base template."""
-        return render_template("base.html", page_title="gym-challenge UI")
+        return render_template(
+            "base.html",
+            page_title=f'{app.config["CHALLENGE_NAME"]} UI',
+        )
 
     return app
