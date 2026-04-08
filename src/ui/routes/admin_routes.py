@@ -406,13 +406,12 @@ def reports_page():
 
         output = StringIO()
         writer = csv.writer(output)
-        writer.writerow(["rank", "participant_id", "display_name", "total_points"])
+        writer.writerow(["rank", "display_name", "total_points"])
 
         for rank, (participant_id, total_points) in enumerate(leaderboard, start=1):
             writer.writerow(
                 [
                     rank,
-                    participant_id,
                     display_name_map.get(participant_id, participant_id),
                     total_points,
                 ]
