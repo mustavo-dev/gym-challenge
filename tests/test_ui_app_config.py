@@ -32,6 +32,28 @@ class UiAppConfigTests(unittest.TestCase):
         html = response.data.decode("utf-8")
         self.assertIn("<title>Test Challenge UI</title>", html)
 
+    def test_create_app_loads_challenge_name_from_instance_config(self) -> None:
+        import os
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            instance_dir = os.path.join(tmpdir, "instance")
+            os.makedirs(instance_dir, exist_ok=True)
+
+            config_path = os.path.join(instance_dir, "config.py")
+            with open(config_path, "w", encoding="utf-8") as handle:
+                handle.write('CHALLENGE_NAME = "Instance Challenge"\n')
+
+            app = create_app(instance_path=instance_dir)
+            app.config["TESTING"] = True
+
+            client = app.test_client()
+            response = client.get("/")
+
+            self.assertEqual(response.status_code, 200)
+            html = response.data.decode("utf-8")
+            self.assertIn("<h1>Instance Challenge</h1>", html)
+
 
 if __name__ == "__main__":
     unittest.main()
