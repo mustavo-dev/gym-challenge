@@ -3,6 +3,7 @@
 import unittest
 
 from src.ui.services.submission_ui_service import filter_and_sort_submissions_for_view
+from src.ui.app import create_app
 
 
 class SubmissionUiServiceTests(unittest.TestCase):
@@ -57,19 +58,24 @@ class SubmissionUiServiceTests(unittest.TestCase):
             source="ui",
         )
 
-        with patch(
-            "src.ui.services.submission_ui_service.load_list",
-            side_effect=[[], []],
-        ), patch(
-            "src.ui.services.submission_ui_service.load_submissions",
-            return_value=[fake_submission],
-        ), patch(
-            "src.ui.services.submission_ui_service.build_display_name_map",
-            return_value={"alpha-01": "Alpha"},
-        ):
-            from src.ui.services.submission_ui_service import get_submissions_for_list
+        app = create_app()
+        app.config["TESTING"] = True
+        app.config["GYM_TIMEZONE"] = "Europe/Berlin"
 
-            rows = get_submissions_for_list()
+        with app.app_context():
+            with patch(
+                "src.ui.services.submission_ui_service.load_list",
+                side_effect=[[], []],
+            ), patch(
+                "src.ui.services.submission_ui_service.load_submissions",
+                return_value=[fake_submission],
+            ), patch(
+                "src.ui.services.submission_ui_service.build_display_name_map",
+                return_value={"alpha-01": "Alpha"},
+            ):
+                from src.ui.services.submission_ui_service import get_submissions_for_list
+
+                rows = get_submissions_for_list()
 
         self.assertEqual(len(rows), 1)
         self.assertIn("submitted_at_raw", rows[0])
@@ -89,19 +95,24 @@ class SubmissionUiServiceTests(unittest.TestCase):
             source="ui",
         )
 
-        with patch(
-            "src.ui.services.submission_ui_service.load_list",
-            side_effect=[[], []],
-        ), patch(
-            "src.ui.services.submission_ui_service.load_submissions",
-            return_value=[fake_submission],
-        ), patch(
-            "src.ui.services.submission_ui_service.build_display_name_map",
-            return_value={"alpha-01": "Alpha"},
-        ):
-            from src.ui.services.submission_ui_service import get_submissions_for_list
+        app = create_app()
+        app.config["TESTING"] = True
+        app.config["GYM_TIMEZONE"] = "Europe/Berlin"
 
-            rows = get_submissions_for_list()
+        with app.app_context():
+            with patch(
+                "src.ui.services.submission_ui_service.load_list",
+                side_effect=[[], []],
+            ), patch(
+                "src.ui.services.submission_ui_service.load_submissions",
+                return_value=[fake_submission],
+            ), patch(
+                "src.ui.services.submission_ui_service.build_display_name_map",
+                return_value={"alpha-01": "Alpha"},
+            ):
+                from src.ui.services.submission_ui_service import get_submissions_for_list
+
+                rows = get_submissions_for_list()
 
         self.assertEqual(len(rows), 1)
         self.assertIn("score_day", rows[0])
