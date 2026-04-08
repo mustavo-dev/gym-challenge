@@ -297,5 +297,35 @@ class UiAlphaRegressionTests(unittest.TestCase):
             expected_to_day,
         )
 
+    def test_admin_submissions_page_displays_score_day(self) -> None:
+        """Admin submissions page should render the derived score day."""
+        with patch(
+            "src.ui.routes.admin_routes.get_submissions_for_list",
+            return_value=[
+                {
+                    "submission_id": "sub-001",
+                    "participant_id": "alpha-01",
+                    "display_name": "Alpha",
+                    "show_participant_id": False,
+                    "submitted_display": "2026-03-16 08:05+01:00",
+                    "submitted_at_raw": "2026-03-16T08:05:00+01:00",
+                    "score_day": "2026-03-15",
+                    "points": 3,
+                    "source": "ui",
+                }
+            ],
+        ), patch(
+            "src.ui.routes.admin_routes.filter_and_sort_submissions_for_view",
+            side_effect=lambda submissions, participant_id, points_value, sort_value: submissions,
+        ), patch(
+            "src.ui.routes.admin_routes.get_participant_choices",
+            return_value=[],
+        ):
+            response = self.client.get("/admin/submissions")
+
+        self.assertEqual(response.status_code, 200)
+        html = response.data.decode("utf-8")
+        self.assertIn("2026-03-15", html)
+
 if __name__ == "__main__":
     unittest.main()
