@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import random
 from datetime import date, datetime, time, timedelta
-from zoneinfo import ZoneInfo
+from src.gymchallenge.runtime_config import get_runtime_timezone
+
+RUNTIME_TZ = get_runtime_timezone()
 
 
 FIRST_NAMES = [
@@ -43,7 +45,7 @@ def generate_demo_participants(count: int, seed: int) -> list[dict]:
                 "participant_id": participant_id,
                 "first_name": first,
                 "last_name": last,
-                "created_at": datetime(2026, 1, 1, 12, 0, 0, tzinfo=ZoneInfo("Europe/Berlin")).isoformat(),
+                "created_at": datetime(2026, 1, 1, 12, 0, 0, tzinfo=RUNTIME_TZ).isoformat(),
                 "active": True,
             }
         )
@@ -63,7 +65,7 @@ def generate_demo_memberships(
                 "cycle_id": cycle_id,
                 "participant_id": p["participant_id"],
                 "active_in_cycle": True,
-                "joined_at": datetime(2026, 1, 1, 12, 0, 0, tzinfo=ZoneInfo("Europe/Berlin")).isoformat(),
+                "joined_at": datetime(2026, 1, 1, 12, 0, 0, tzinfo=RUNTIME_TZ).isoformat(),
                 "left_at": None,
                 "inactive_reason": None,
                 "inactive_effective_score_day": None,
@@ -80,7 +82,7 @@ def generate_demo_submissions(
     to_day: date,
     seed: int,
     miss_rate: float,
-    tz: ZoneInfo,
+    tzinfo=RUNTIME_TZ,
 ) -> list[dict]:
     rng = random.Random(seed)
     rows: list[dict] = []

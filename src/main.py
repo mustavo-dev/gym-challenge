@@ -5,7 +5,7 @@ import csv
 
 from datetime import date, datetime
 from typing import Any
-from zoneinfo import ZoneInfo
+from src.gymchallenge.runtime_config import get_runtime_timezone
 
 from gymchallenge.models import Submission, Correction, Membership, MembershipEvent, Cycle
 from gymchallenge.scoring_engine import compute_daily_scores, build_leaderboard, detect_auto_inactive, apply_auto_inactive, reactivate_member
@@ -26,7 +26,7 @@ from gymchallenge.display_names import build_display_name_map
 from gymchallenge.demo_data_generator import generate_demo_participants, generate_demo_memberships, generate_demo_submissions
 from gymchallenge.loaders import load_memberships, load_cycles, load_submissions, load_corrections, load_membership_events
 
-BERLIN = ZoneInfo("Europe/Berlin")
+RUNTIME_TZ = get_runtime_timezone()
 
 
 def parse_date(s: str) -> date:
@@ -53,7 +53,7 @@ def cmd_report(args: argparse.Namespace) -> int:
     daily = compute_daily_scores(
         participant_ids=participant_ids,
         submissions=submissions,
-        tz=BERLIN,
+        tz=RUNTIME_TZ,
         cycle_start=cycle_start,
         cycle_end=cycle_end,
         missing_points=-3,
@@ -63,7 +63,7 @@ def cmd_report(args: argparse.Namespace) -> int:
     leaderboard = build_leaderboard(
         memberships=memberships,
         membership_events=membership_events,
-        tz=BERLIN,
+        tz=RUNTIME_TZ,
         daily=daily,
         from_day=from_day,
         to_day=to_day,
@@ -133,7 +133,7 @@ def cmd_membership_add(args: argparse.Namespace) -> int:
         "cycle_id": cycle_id,
         "participant_id": participant_id,
         "active_in_cycle": True,
-        "joined_at": datetime.now(BERLIN).isoformat(),
+        "joined_at": datetime.now(RUNTIME_TZ).isoformat(),
         "left_at": None,
         "inactive_reason": None,
         "inactive_effective_score_day": None,
@@ -154,7 +154,7 @@ def cmd_submission_add(args: argparse.Namespace) -> int:
     if args.submitted_at:
         submitted_at = datetime.fromisoformat(args.submitted_at)
     else:
-        submitted_at = datetime.now(BERLIN)
+        submitted_at = datetime.now(RUNTIME_TZ)
 
     row = {
         "submission_id": new_submission_id(),
@@ -190,7 +190,7 @@ def cmd_correction_add(args: argparse.Namespace) -> int:
         "score_day": score_day.isoformat(),
         "new_points": points,
         "reason": reason,
-        "created_at": datetime.now(BERLIN).isoformat(),
+        "created_at": datetime.now(RUNTIME_TZ).isoformat(),
         "admin": "jayme",  # MVP default; later: --admin
     }
 
@@ -229,7 +229,7 @@ def cmd_membership_reactivate(args: argparse.Namespace) -> int:
         event_type="manual_reactivate",
         effective_score_day=effective_day,
         reason=reason,
-        created_at=datetime.now(BERLIN),
+        created_at=datetime.now(RUNTIME_TZ),
         actor="jayme",
     )
 
@@ -265,7 +265,7 @@ def cmd_membership_deactivate(args: argparse.Namespace) -> int:
         event_type="manual_inactive",
         effective_score_day=effective_day,
         reason=reason,
-        created_at=datetime.now(BERLIN),
+        created_at=datetime.now(RUNTIME_TZ),
         actor="jayme",
     )
 
@@ -294,7 +294,7 @@ def cmd_system_apply_auto_inactive(args: argparse.Namespace) -> int:
     daily = compute_daily_scores(
         participant_ids=participant_ids,
         submissions=submissions,
-        tz=BERLIN,
+        tz=RUNTIME_TZ,
         cycle_start=from_day,
         cycle_end=to_day,
         missing_points=-3,
@@ -347,7 +347,7 @@ def cmd_system_apply_auto_inactive(args: argparse.Namespace) -> int:
         existing_rows=existing_event_rows,
         cycle_id=cycle_id,
         updates=updates,
-        created_at=datetime.now(BERLIN),
+        created_at=datetime.now(RUNTIME_TZ),
     )
 
     print(
@@ -378,7 +378,7 @@ def cmd_system_apply_auto_reactivate(args: argparse.Namespace) -> int:
     daily = compute_daily_scores(
         participant_ids=participant_ids,
         submissions=submissions,
-        tz=BERLIN,
+        tz=RUNTIME_TZ,
         cycle_start=from_day,
         cycle_end=to_day,
         missing_points=-3,
@@ -438,7 +438,7 @@ def cmd_system_apply_auto_reactivate(args: argparse.Namespace) -> int:
         existing_rows=existing_event_rows,
         cycle_id=cycle_id,
         updates=updates,
-        created_at=datetime.now(BERLIN),
+        created_at=datetime.now(RUNTIME_TZ),
     )
 
     print(
@@ -467,13 +467,13 @@ def cmd_cycle_create(args: argparse.Namespace) -> int:
         name=name,
         start_day=start_day,
         end_day=end_day,
-        created_at=datetime.now(BERLIN),
+        created_at=datetime.now(RUNTIME_TZ),
         active=True,  # legacy field retained for now
     )
 
     existing_cycles = load_cycles(rows)
 
-    if cycle_overlaps_existing(new_cycle, existing_cycles, BERLIN):
+    if cycle_overlaps_existing(new_cycle, existing_cycles, RUNTIME_TZ):
         raise ValueError("new cycle overlaps an existing cycle active window")
 
     if has_cycle_id(rows, cycle_id):
@@ -484,7 +484,7 @@ def cmd_cycle_create(args: argparse.Namespace) -> int:
         "name": name,
         "start_day": start_day.isoformat(),
         "end_day": end_day.isoformat(),
-        "created_at": datetime.now(BERLIN).isoformat(),
+        "created_at": datetime.now(RUNTIME_TZ).isoformat(),
         "active": True,
     }
 
@@ -500,11 +500,11 @@ def cmd_cycle_list(args: argparse.Namespace) -> int:
         return 0
 
     cycles = load_cycles(rows)
-    now = datetime.now(BERLIN)
+    now = datetime.now(RUNTIME_TZ)
 
     print("Cycles:")
     for cycle in cycles:
-        status = cycle_status(cycle, now, BERLIN)
+        status = cycle_status(cycle, now, RUNTIME_TZ)
         print(
             f"- {cycle.cycle_id} | {cycle.name} | "
             f"{cycle.start_day.isoformat()}..{cycle.end_day.isoformat()} | {status}"
@@ -522,10 +522,10 @@ def cmd_cycle_show(args: argparse.Namespace) -> int:
         raise ValueError(f"cycle not found: {cycle_id}")
 
     cycle = load_cycles([row])[0]
-    now = datetime.now(BERLIN)
-    status = cycle_status(cycle, now, BERLIN)
-    window_start = cycle_window_start(cycle, BERLIN)
-    window_end = cycle_window_end(cycle, BERLIN)
+    now = datetime.now(RUNTIME_TZ)
+    status = cycle_status(cycle, now, RUNTIME_TZ)
+    window_start = cycle_window_start(cycle, RUNTIME_TZ)
+    window_end = cycle_window_end(cycle, RUNTIME_TZ)
 
     memberships_rows = load_list(data_path("memberships.json"))
     submissions_rows = load_list(data_path("submissions.json"))
@@ -564,7 +564,7 @@ def cmd_system_generate_demo_data(args: argparse.Namespace) -> int:
     from_day = date.fromisoformat(args.from_day)
     to_day = date.fromisoformat(args.to_day)
 
-    tz = BERLIN
+    tz = RUNTIME_TZ
 
     print("Generating demo dataset...")
     print(f"Participants: {participant_count}")
