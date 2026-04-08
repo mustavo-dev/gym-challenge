@@ -83,7 +83,7 @@ class UiAppConfigTests(unittest.TestCase):
 
         self.assertEqual(app.config["GYM_NAME"], "Default Gym")
         self.assertEqual(app.config["ADMIN_NAME"], "Admin")
-        self.assertEqual(app.config["GYM_TIMEZONE"], "Europe/Berlin")
+        self.assertEqual(app.config["GYM_TIMEZONE"], "UTC")
 
     def test_admin_dashboard_shows_configured_gym_name(self) -> None:
         app = create_app()

@@ -1,16 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
 from src.gymchallenge.cycle_timeline import cycle_status
 from src.gymchallenge.data_paths import data_path
 from src.gymchallenge.display_names import build_display_name_map
 from src.gymchallenge.loaders import load_cycles, load_memberships
 from src.gymchallenge.storage_json import load_list
-
-BERLIN = ZoneInfo("Europe/Berlin")
-
+from src.ui.config import get_ui_timezone
 
 def get_submit_page_context() -> dict:
     """Return active-cycle submit context for the participant submit page."""
@@ -26,13 +23,14 @@ def get_submit_page_context() -> dict:
     cycles = load_cycles(cycle_rows)
     memberships = load_memberships(membership_rows)
     display_name_map = build_display_name_map(participant_rows)
-
-    now = datetime.now(BERLIN)
+    
+    ui_tz = get_ui_timezone()
+    now = datetime.now(ui_tz)
 
     active_cycles = [
         cycle
         for cycle in cycles
-        if cycle_status(cycle, now, BERLIN) == "active"
+        if cycle_status(cycle, now, ui_tz) == "active"
     ]
 
     if not active_cycles:

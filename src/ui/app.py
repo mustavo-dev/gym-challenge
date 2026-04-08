@@ -21,7 +21,7 @@ def create_app(instance_path: str | None = None) -> Flask:
     app.config.setdefault("CHALLENGE_NAME", "gym-challenge")
     app.config.setdefault("GYM_NAME", "Default Gym")
     app.config.setdefault("ADMIN_NAME", "Admin")
-    app.config.setdefault("GYM_TIMEZONE", "Europe/Berlin")
+    app.config.setdefault("GYM_TIMEZONE", "UTC")
 
     try:
         app.config.from_pyfile("config.py")

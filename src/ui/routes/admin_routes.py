@@ -41,9 +41,8 @@ def participants_page():
         from src.gymchallenge.storage_json import load_list
         from src.gymchallenge.data_paths import data_path
         from datetime import datetime
-        from zoneinfo import ZoneInfo
 
-        BERLIN = ZoneInfo("Europe/Berlin")
+        ui_tz = get_ui_timezone()
 
         path = data_path("participants.json")
         existing = load_list(path)
@@ -58,7 +57,7 @@ def participants_page():
             "participant_id": participant_id,
             "first_name": first,
             "last_name": last,
-            "created_at": datetime.now(BERLIN).isoformat(),
+            "created_at": datetime.now(ui_tz).isoformat(),
             "active": True,
             "archived": False,
         }
@@ -93,14 +92,13 @@ def memberships_page():
             return redirect(url_for("admin.memberships_page"))
 
         from datetime import datetime
-        from zoneinfo import ZoneInfo
 
         from src.gymchallenge.data_paths import data_path
         from src.gymchallenge.storage_json import load_list
         from src.gymchallenge.storage_ops import append_row
         from src.gymchallenge.membership_store import find_membership_index
 
-        BERLIN = ZoneInfo("Europe/Berlin")
+        ui_tz = get_ui_timezone()
 
         path = data_path("memberships.json")
         rows = load_list(path)
@@ -118,7 +116,7 @@ def memberships_page():
             "cycle_id": cycle_id,
             "participant_id": participant_id,
             "active_in_cycle": True,
-            "joined_at": datetime.now(BERLIN).isoformat(),
+            "joined_at": datetime.now(ui_tz).isoformat(),
             "left_at": None,
             "inactive_reason": None,
             "inactive_effective_score_day": None,
@@ -189,7 +187,6 @@ def corrections_page():
             return redirect(url_for("admin.corrections_page"))
 
         from datetime import date, datetime
-        from zoneinfo import ZoneInfo
 
         from src.gymchallenge.id_ops import new_correction_id
         from src.gymchallenge.storage_json import load_list
@@ -197,7 +194,7 @@ def corrections_page():
         from src.gymchallenge.data_paths import data_path
         from src.gymchallenge.membership_store import find_membership_index
 
-        BERLIN = ZoneInfo("Europe/Berlin")
+        ui_tz = get_ui_timezone()
 
         try:
             new_points = int(new_points_raw)
@@ -235,7 +232,7 @@ def corrections_page():
             "score_day": score_day_date.isoformat(),
             "new_points": new_points,
             "reason": reason,
-            "created_at": datetime.now(BERLIN).isoformat(),
+            "created_at": datetime.now(ui_tz).isoformat(),
             "admin": "jayme",
         }
 
@@ -298,7 +295,6 @@ def cycles_page():
             return redirect(url_for("admin.cycles_page"))
 
         from datetime import date, datetime
-        from zoneinfo import ZoneInfo
 
         from src.gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_cycle_id
         from src.gymchallenge.cycle_timeline import cycle_overlaps_existing
@@ -308,7 +304,7 @@ def cycles_page():
         from src.gymchallenge.storage_ops import append_row
         from src.gymchallenge.models import Cycle
 
-        BERLIN = ZoneInfo("Europe/Berlin")
+        ui_tz = get_ui_timezone()
 
         year = int(year_raw)
         rows = load_list(data_path("cycles.json"))
@@ -326,11 +322,11 @@ def cycles_page():
             name=cycle_name,
             start_day=date.fromisoformat(start_day),
             end_day=date.fromisoformat(end_day),
-            created_at=datetime.now(BERLIN),
+            created_at=datetime.now(ui_tz),
             active=True,
         )
 
-        if cycle_overlaps_existing(new_cycle, existing_cycles, BERLIN):
+        if cycle_overlaps_existing(new_cycle, existing_cycles, ui_tz):
             flash("Cycle window overlaps an existing cycle.", "error")
             return redirect(url_for("admin.cycles_page"))
 

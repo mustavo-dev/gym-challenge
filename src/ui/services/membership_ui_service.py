@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 from datetime import datetime
-from zoneinfo import ZoneInfo
 
 from src.gymchallenge.cycle_timeline import cycle_status
 from src.gymchallenge.loaders import load_cycles
@@ -12,8 +11,7 @@ from src.gymchallenge.data_paths import data_path
 from src.gymchallenge.display_names import build_display_name_map
 from src.gymchallenge.storage_json import load_list
 from src.gymchallenge.loaders import load_memberships
-
-BERLIN = ZoneInfo("Europe/Berlin")
+from src.ui.config import get_ui_timezone
 
 def get_memberships_for_list() -> list[dict[str, Any]]:
     """Return membership rows formatted for admin list display."""
@@ -30,7 +28,8 @@ def get_memberships_for_list() -> list[dict[str, Any]]:
     cycle_rows = load_list(data_path("cycles.json"))
     cycles = load_cycles(cycle_rows)
     cycle_map = {cycle.cycle_id: cycle for cycle in cycles}
-    now = datetime.now(BERLIN)
+    ui_tz = get_ui_timezone()
+    now = datetime.now(ui_tz)
 
     items: list[dict[str, Any]] = []
 
@@ -41,7 +40,7 @@ def get_memberships_for_list() -> list[dict[str, Any]]:
             continue
 
         cycle = cycle_map.get(membership.cycle_id)
-        cycle_status_label = cycle_status(cycle, now, BERLIN).title() if cycle else "Unknown"
+        cycle_status_label = cycle_status(cycle, now, ui_tz).title() if cycle else "Unknown"
 
         items.append(
             {
