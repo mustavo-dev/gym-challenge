@@ -9,6 +9,8 @@ from src.ui.services.submission_ui_service import get_submissions_for_list, filt
 from src.ui.services.correction_ui_service import get_corrections_for_list
 from src.ui.services.history_ui_service import get_history_for_list, filter_and_sort_history_for_view
 
+from src.ui.config import get_ui_timezone
+
 admin_bp = Blueprint(
     "admin",
     __name__,
@@ -373,7 +375,6 @@ def reports_page():
         import csv
         from io import StringIO
         from datetime import datetime, timedelta
-        from zoneinfo import ZoneInfo
         from flask import Response
 
         from src.gymchallenge.data_paths import data_path
@@ -389,7 +390,7 @@ def reports_page():
         from src.gymchallenge.scoring_engine import compute_daily_scores, build_leaderboard
         from src.gymchallenge.scoring_time import score_day_for_timestamp
 
-        BERLIN = ZoneInfo("Europe/Berlin")
+        ui_tz = get_ui_timezone()
 
         cycle_rows = load_list(data_path("cycles.json"))
         membership_rows = load_list(data_path("memberships.json"))
@@ -417,10 +418,10 @@ def reports_page():
         }
 
         report_to_day = selected_cycle.end_day
-        now = datetime.now(BERLIN)
+        now = datetime.now(ui_tz)
 
         if selected_cycle.start_day <= now.date() <= selected_cycle.end_day:
-            current_score_day = score_day_for_timestamp(now, BERLIN)
+            current_score_day = score_day_for_timestamp(now, ui_tz)
             if current_score_day is None:
                 current_score_day = now.date() - timedelta(days=1)
 
@@ -438,7 +439,7 @@ def reports_page():
         daily = compute_daily_scores(
             participant_ids=participant_ids,
             submissions=submissions,
-            tz=BERLIN,
+            tz=ui_tz,
             cycle_start=selected_cycle.start_day,
             cycle_end=report_to_day,
             missing_points=-3,
@@ -448,7 +449,7 @@ def reports_page():
         leaderboard = build_leaderboard(
             memberships=cycle_memberships,
             membership_events=[e for e in membership_events if e.cycle_id == cycle_id],
-            tz=BERLIN,
+            tz=ui_tz,
             daily=daily,
             from_day=selected_cycle.start_day,
             to_day=report_to_day,
