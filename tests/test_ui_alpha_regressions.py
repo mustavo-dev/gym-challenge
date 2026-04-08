@@ -387,5 +387,38 @@ class UiAlphaRegressionTests(unittest.TestCase):
         html = response.data.decode("utf-8")
         self.assertIn("Recorded at: 2026-03-16 08:05 CET", html)
 
+    def test_corrections_page_filters_participant_choices_by_score_day_cycle(self) -> None:
+        """Corrections page should only offer members of the score day's cycle."""
+        with patch(
+            "src.ui.routes.admin_routes.get_corrections_for_list",
+            return_value=[],
+        ), patch(
+            "src.ui.routes.admin_routes.find_cycle_id_for_score_day",
+            return_value="spring26",
+        ), patch(
+            "src.ui.routes.admin_routes.get_participant_choices",
+            return_value=[
+                {"participant_id": "member-01", "display_name": "Member One"},
+                {"participant_id": "outsider-01", "display_name": "Outsider One"},
+            ],
+        ), patch(
+            "src.gymchallenge.data_paths.data_path",
+            return_value="/tmp/mock.json",
+        ), patch(
+            "src.gymchallenge.storage_json.load_list",
+            side_effect=[
+                [
+                    {"cycle_id": "spring26", "participant_id": "member-01"},
+                    {"cycle_id": "other26", "participant_id": "outsider-01"},
+                ],
+            ],
+        ):
+            response = self.client.get("/admin/corrections?score_day=2026-03-17")
+
+        self.assertEqual(response.status_code, 200)
+        html = response.data.decode("utf-8")
+        self.assertIn("Member One", html)
+        self.assertNotIn("Outsider One", html)
+
 if __name__ == "__main__":
     unittest.main()

@@ -243,7 +243,35 @@ def corrections_page():
         return redirect(url_for("admin.corrections_page"))
 
     corrections = get_corrections_for_list()
+
+    score_day_value = request.args.get("score_day", "").strip()
     participant_choices = get_participant_choices()
+
+    if score_day_value:
+        from datetime import date
+
+        from src.gymchallenge.data_paths import data_path
+        from src.gymchallenge.storage_json import load_list
+
+        try:
+            score_day_date = date.fromisoformat(score_day_value)
+        except ValueError:
+            score_day_date = None
+
+        if score_day_date is not None:
+            cycle_id = find_cycle_id_for_score_day(score_day_date)
+            if cycle_id is not None:
+                membership_rows = load_list(data_path("memberships.json"))
+                allowed_participant_ids = {
+                    row["participant_id"]
+                    for row in membership_rows
+                    if row.get("cycle_id") == cycle_id
+                }
+                participant_choices = [
+                    choice
+                    for choice in participant_choices
+                    if choice["participant_id"] in allowed_participant_ids
+                ]
 
     return render_template(
         "admin/corrections.html",
