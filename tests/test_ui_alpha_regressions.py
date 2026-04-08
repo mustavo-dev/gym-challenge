@@ -59,6 +59,36 @@ class UiAlphaRegressionTests(unittest.TestCase):
         mock_new_submission_id.assert_not_called()
         mock_append_row.assert_not_called()
 
+    def test_correction_rejects_non_member_for_matching_cycle(self) -> None:
+        """A correction must not be written for a participant outside the cycle."""
+        with patch(
+            "src.ui.routes.admin_routes.find_cycle_id_for_score_day",
+            return_value="spring26",
+        ), patch(
+            "src.gymchallenge.data_paths.data_path",
+            return_value="/tmp/mock.json",
+        ), patch(
+            "src.gymchallenge.storage_json.load_list",
+            return_value=[],
+        ), patch(
+            "src.gymchallenge.id_ops.new_correction_id",
+            return_value="cor-001",
+        ) as mock_new_correction_id, patch(
+            "src.gymchallenge.storage_ops.append_row",
+        ) as mock_append_row:
+            response = self.client.post(
+                "/admin/corrections",
+                data={
+                    "participant_id": "frank-test-01",
+                    "score_day": "2026-03-17",
+                    "new_points": "2",
+                    "reason": "alpha regression",
+                },
+            )
+
+        self.assertEqual(response.status_code, 302)
+        mock_new_correction_id.assert_not_called()
+        mock_append_row.assert_not_called()
 
 if __name__ == "__main__":
     unittest.main()

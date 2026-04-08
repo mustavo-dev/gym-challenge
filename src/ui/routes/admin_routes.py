@@ -193,6 +193,7 @@ def corrections_page():
         from src.gymchallenge.storage_json import load_list
         from src.gymchallenge.storage_ops import append_row
         from src.gymchallenge.data_paths import data_path
+        from src.gymchallenge.membership_store import find_membership_index
 
         BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -211,6 +212,16 @@ def corrections_page():
         cycle_id = find_cycle_id_for_score_day(score_day_date)
         if cycle_id is None:
             flash("No matching cycle found for that score day.", "error")
+            return redirect(url_for("admin.corrections_page"))
+
+        membership_rows = load_list(data_path("memberships.json"))
+        membership_index = find_membership_index(
+            membership_rows,
+            cycle_id=cycle_id,
+            participant_id=participant_id,
+        )
+        if membership_index is None:
+            flash("Selected participant is not a member of the relevant cycle.", "error")
             return redirect(url_for("admin.corrections_page"))
 
         correction_id = new_correction_id()
