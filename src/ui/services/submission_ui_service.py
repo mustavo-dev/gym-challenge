@@ -37,7 +37,7 @@ def get_submissions_for_list() -> list[dict[str, Any]]:
                 "display_name": display_name,
                 "show_participant_id": name_counts.get(display_name, 0) > 1,
                 "submitted_display": submission.submitted_at.isoformat(sep=" ", timespec="minutes"),
-                "submitted_at_faw": submission.submitted_at.isoformat(),
+                "submitted_at_raw": submission.submitted_at.isoformat(),
                 "points": submission.points,
                 "source": submission.source,
             }
