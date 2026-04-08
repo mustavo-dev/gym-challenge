@@ -136,6 +136,37 @@ class TestMembershipTimeline(unittest.TestCase):
         self.assertEqual(active_map[date(2026, 3, 5)], False)
         self.assertEqual(active_map[date(2026, 3, 6)], False)
 
+    def test_inactive_membership_without_events_stops_at_inactive_effective_day(self):
+        membership = Membership(
+            cycle_id="c1",
+            participant_id="p1",
+            active_in_cycle=False,
+            joined_at=datetime.fromisoformat("2026-03-01T20:00:00+01:00"),
+            left_at=None,
+            inactive_reason="auto",
+            inactive_effective_score_day=date(2026, 3, 4),
+        )
+
+        active_map = build_active_day_map(
+            membership=membership,
+            events=[],
+            from_day=date(2026, 3, 1),
+            to_day=date(2026, 3, 6),
+            tz=BERLIN,
+        )
+
+        self.assertEqual(
+            active_map,
+            {
+                date(2026, 3, 1): True,
+                date(2026, 3, 2): True,
+                date(2026, 3, 3): True,
+                date(2026, 3, 4): False,
+                date(2026, 3, 5): False,
+                date(2026, 3, 6): False,
+            },
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

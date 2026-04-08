@@ -35,16 +35,32 @@ def build_active_day_map(
         joined_sd = from_day
 
     left_sd = None
-    if membership.left_at is not None:
-        left_sd = score_day_for_timestamp(membership.left_at, tz)
 
-    relevant_events = sorted(events, key=lambda e: (e.effective_score_day, e.created_at))
+    synthetic_events = list(events)
+
+    if (
+        membership.inactive_effective_score_day is not None
+        and not membership.active_in_cycle
+    ):
+        synthetic_events.append(
+            MembershipEvent(
+                event_id="synthetic-membership-inactive",
+                cycle_id=membership.cycle_id,
+                participant_id=membership.participant_id,
+                event_type="auto_inactive",
+                effective_score_day=membership.inactive_effective_score_day,
+                reason=membership.inactive_reason or "membership row inactive state",
+                created_at=membership.joined_at,
+                actor="system",
+            )
+        )
+
+    relevant_events = sorted(
+        synthetic_events,
+        key=lambda e: (e.effective_score_day, e.created_at),
+    )
 
     result: dict[date, bool] = {}
-    current_active = membership.active_in_cycle
-
-    # Baseline should be active from joined day unless an event changes it later.
-    # For MVP timeline reconstruction, start active if the member has joined and not left.
     current_active = True
 
     event_idx = 0
