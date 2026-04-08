@@ -437,5 +437,64 @@ class UiAlphaRegressionTests(unittest.TestCase):
         self.assertIn('value="2026-03-17"', html)
         self.assertIn("Load Eligible Participants", html)
 
+    def test_submit_success_uses_configured_gym_timezone(self) -> None:
+        """Submit success message should use the configured gym timezone."""
+        from datetime import date, datetime as RealDateTime
+
+        self.app.config["GYM_TIMEZONE"] = "America/New_York"
+
+        context = {
+            "submit_enabled": True,
+            "active_cycle": SimpleNamespace(cycle_id="spring26", name="Spring 2026"),
+            "participant_choices": [
+                {"participant_id": "walker-luke-01", "display_name": "Luke Walker"},
+            ],
+            "submit_message": "",
+        }
+
+        class FixedDateTime(RealDateTime):
+            @classmethod
+            def now(cls, tz=None):
+                if tz is None:
+                    return cls(2026, 3, 16, 8, 5)
+                return cls(2026, 3, 16, 8, 5, tzinfo=tz)
+
+        with patch(
+            "datetime.datetime",
+            FixedDateTime,
+        ), patch(
+            "src.ui.routes.participant_routes.get_submit_page_context",
+            return_value=context,
+        ), patch(
+            "src.gymchallenge.data_paths.data_path",
+            return_value="/tmp/submissions.json",
+        ), patch(
+            "src.gymchallenge.storage_json.load_list",
+            return_value=[],
+        ), patch(
+            "src.gymchallenge.loaders.load_submissions",
+            return_value=[],
+        ), patch(
+            "src.gymchallenge.scoring_time.score_day_for_timestamp",
+            return_value=date(2026, 3, 15),
+        ), patch(
+            "src.gymchallenge.id_ops.new_submission_id",
+            return_value="sub-001",
+        ), patch(
+            "src.gymchallenge.storage_ops.append_row",
+        ):
+            response = self.client.post(
+                "/submit",
+                data={
+                    "participant_id": "walker-luke-01",
+                    "points": "3",
+                },
+                follow_redirects=True,
+            )
+
+        self.assertEqual(response.status_code, 200)
+        html = response.data.decode("utf-8")
+        self.assertIn("Recorded at: 2026-03-16 08:05 EDT", html)
+
 if __name__ == "__main__":
     unittest.main()

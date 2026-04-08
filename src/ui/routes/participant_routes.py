@@ -2,6 +2,7 @@
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from src.ui.services.submit_ui_service import get_submit_page_context
+from src.ui.config import get_ui_timezone
 
 participant_bp = Blueprint(
     "participant",
@@ -42,7 +43,6 @@ def submit_page():
             return redirect(url_for(".submit_page"))
 
         from datetime import datetime
-        from zoneinfo import ZoneInfo
 
         from src.gymchallenge.data_paths import data_path
         from src.gymchallenge.id_ops import new_submission_id
@@ -51,11 +51,11 @@ def submit_page():
         from src.gymchallenge.storage_json import load_list
         from src.gymchallenge.storage_ops import append_row
 
-        BERLIN = ZoneInfo("Europe/Berlin")
-        now = datetime.now(BERLIN)
+        ui_tz = get_ui_timezone()
+        now = datetime.now(ui_tz)
 
         active_cycle = context["active_cycle"]
-        score_day = score_day_for_timestamp(now, BERLIN)
+        score_day = score_day_for_timestamp(now, ui_tz)
 
         if score_day is None:
             flash("Submissions are only accepted during the active scoring window.", "error")
@@ -67,7 +67,7 @@ def submit_page():
         duplicate_exists = any(
             submission.cycle_id == active_cycle.cycle_id
             and submission.participant_id == participant_id
-            and score_day_for_timestamp(submission.submitted_at, BERLIN) == score_day
+            and score_day_for_timestamp(submission.submitted_at, ui_tz) == score_day
             for submission in existing_submissions
         )
 
