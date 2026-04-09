@@ -121,5 +121,41 @@ class UiAppConfigTests(unittest.TestCase):
         html = response.data.decode("utf-8")
         self.assertIn("Generate downloadable challenge reports for Jayme.", html)
 
+    def test_create_app_loads_secret_key_from_instance_config(self) -> None:
+        import os
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            instance_dir = os.path.join(tmpdir, "instance")
+            os.makedirs(instance_dir, exist_ok=True)
+
+            config_path = os.path.join(instance_dir, "config.py")
+            with open(config_path, "w", encoding="utf-8") as handle:
+                handle.write('SECRET_KEY = "instance-secret-key"\n')
+
+            app = create_app(instance_path=instance_dir)
+            app.config["TESTING"] = True
+
+            self.assertEqual(app.secret_key, "instance-secret-key")
+
+    def test_create_app_prefers_secret_key_from_environment(self) -> None:
+        import os
+        import tempfile
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            instance_dir = os.path.join(tmpdir, "instance")
+            os.makedirs(instance_dir, exist_ok=True)
+
+            config_path = os.path.join(instance_dir, "config.py")
+            with open(config_path, "w", encoding="utf-8") as handle:
+                handle.write('SECRET_KEY = "instance-secret-key"\n')
+
+            with patch.dict(os.environ, {"SECRET_KEY": "env-secret-key"}, clear=False):
+                app = create_app(instance_path=instance_dir)
+                app.config["TESTING"] = True
+
+            self.assertEqual(app.secret_key, "env-secret-key")
+
 if __name__ == "__main__":
     unittest.main()

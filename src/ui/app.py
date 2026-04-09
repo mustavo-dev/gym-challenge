@@ -1,5 +1,7 @@
 """UI application entrypoint for the gym-challenge web interface."""
 
+import os
+
 from flask import Flask, render_template
 
 from src.ui.routes.participant_routes import participant_bp
@@ -27,6 +29,11 @@ def create_app(instance_path: str | None = None) -> Flask:
         app.config.from_pyfile("config.py")
     except FileNotFoundError:
         pass
+
+    app.secret_key = os.environ.get(
+        "SECRET_KEY",
+        app.config.get("SECRET_KEY", app.secret_key),
+    )
 
     app.register_blueprint(participant_bp)
     app.register_blueprint(admin_bp)

@@ -27,7 +27,7 @@ from src.gymchallenge.demo_data_generator import generate_demo_participants, gen
 from src.gymchallenge.loaders import load_memberships, load_cycles, load_submissions, load_corrections, load_membership_events
 
 RUNTIME_TZ = get_runtime_timezone()
-RUNTIME_ADMIN_Name = get_runtime_admin_name()
+RUNTIME_ADMIN_NAME = get_runtime_admin_name()
 
 def parse_date(s: str) -> date:
     return date.fromisoformat(s)
@@ -106,7 +106,7 @@ def cmd_participant_add(args: argparse.Namespace) -> int:
         "participant_id": participant_id,
         "first_name": first,
         "last_name": last,
-        "created_at": datetime.now(BERLIN).isoformat(),
+        "created_at": datetime.now(RUNTIME_TZ).isoformat(),
         "active": True,
     }
 
@@ -191,7 +191,7 @@ def cmd_correction_add(args: argparse.Namespace) -> int:
         "new_points": points,
         "reason": reason,
         "created_at": datetime.now(RUNTIME_TZ).isoformat(),
-        "admin": RUNTIME_ADMIN_NAME()
+        "admin": RUNTIME_ADMIN_NAME,
     }
 
     append_row(data_path("corrections.json"), row)
