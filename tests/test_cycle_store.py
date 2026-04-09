@@ -1,6 +1,6 @@
 import unittest
 
-from gymchallenge.cycle_store import find_cycle_row
+from src.gymchallenge.cycle_store import find_cycle_row
 
 
 class TestCycleStore(unittest.TestCase):

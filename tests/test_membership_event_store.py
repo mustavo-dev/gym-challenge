@@ -1,6 +1,6 @@
 import unittest
 
-from gymchallenge.membership_event_store import has_matching_event
+from src.gymchallenge.membership_event_store import has_matching_event
 
 
 class TestMembershipEventStore(unittest.TestCase):

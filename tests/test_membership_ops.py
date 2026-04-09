@@ -1,6 +1,6 @@
 import unittest
 
-from gymchallenge.membership_ops import has_membership
+from src.gymchallenge.membership_ops import has_membership
 
 
 class TestMembershipOps(unittest.TestCase):

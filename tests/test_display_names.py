@@ -1,6 +1,6 @@
 import unittest
 
-from gymchallenge.display_names import build_display_name_map
+from src.gymchallenge.display_names import build_display_name_map
 
 
 class TestDisplayNames(unittest.TestCase):

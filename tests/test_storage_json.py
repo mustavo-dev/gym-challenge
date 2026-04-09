@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 
-from gymchallenge.storage_json import load_list, save_list
+from src.gymchallenge.storage_json import load_list, save_list
 
 
 class TestStorageJson(unittest.TestCase):

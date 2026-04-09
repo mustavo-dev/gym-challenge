@@ -3,8 +3,8 @@ import tempfile
 import unittest
 from datetime import date, datetime
 
-from gymchallenge.storage_json import load_list
-from gymchallenge.system_event_ops import append_missing_auto_reactivate_events
+from src.gymchallenge.storage_json import load_list
+from src.gymchallenge.system_event_ops import append_missing_auto_reactivate_events
 
 
 class TestSystemReactivationOps(unittest.TestCase):

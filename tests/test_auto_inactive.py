@@ -2,7 +2,7 @@ import unittest
 from datetime import date
 from zoneinfo import ZoneInfo
 
-from gymchallenge.scoring_engine import DailyScore, detect_auto_inactive
+from src.gymchallenge.scoring_engine import DailyScore, detect_auto_inactive
 
 
 class TestAutoInactive(unittest.TestCase):

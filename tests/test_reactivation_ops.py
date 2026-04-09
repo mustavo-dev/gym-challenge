@@ -1,9 +1,9 @@
 import unittest
 from datetime import date, datetime
 
-from gymchallenge.models import Membership
-from gymchallenge.scoring_engine import DailyScore
-from gymchallenge.reactivation_ops import detect_auto_reactivate
+from src.gymchallenge.models import Membership
+from src.gymchallenge.scoring_engine import DailyScore
+from src.gymchallenge.reactivation_ops import detect_auto_reactivate
 
 
 class TestReactivationOps(unittest.TestCase):

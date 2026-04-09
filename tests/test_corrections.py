@@ -2,8 +2,8 @@ import unittest
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-from gymchallenge.models import Submission, Correction
-from gymchallenge.scoring_engine import compute_daily_scores
+from src.gymchallenge.models import Submission, Correction
+from src.gymchallenge.scoring_engine import compute_daily_scores
 
 
 BERLIN = ZoneInfo("Europe/Berlin")

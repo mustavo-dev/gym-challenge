@@ -1,8 +1,8 @@
 import unittest
 from datetime import date, datetime
 
-from gymchallenge.models import Membership
-from gymchallenge.scoring_engine import apply_auto_inactive, reactivate_member
+from src.gymchallenge.models import Membership
+from src.gymchallenge.scoring_engine import apply_auto_inactive, reactivate_member
 
 
 class TestMembershipUpdates(unittest.TestCase):

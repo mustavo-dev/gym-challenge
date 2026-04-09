@@ -1,6 +1,6 @@
 import unittest
 
-from gymchallenge.participant_ops import generate_participant_id
+from src.gymchallenge.participant_ops import generate_participant_id
 
 
 class TestParticipantOps(unittest.TestCase):

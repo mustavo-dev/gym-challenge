@@ -3,8 +3,8 @@ import tempfile
 import unittest
 from datetime import date, datetime
 
-from gymchallenge.membership_event_ops import append_membership_event
-from gymchallenge.storage_json import load_list
+from src.gymchallenge.membership_event_ops import append_membership_event
+from src.gymchallenge.storage_json import load_list
 
 
 class TestMembershipEventOps(unittest.TestCase):

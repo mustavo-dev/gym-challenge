@@ -2,8 +2,8 @@ import unittest
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-from gymchallenge.models import Cycle
-from gymchallenge.cycle_timeline import (
+from src.gymchallenge.models import Cycle
+from src.gymchallenge.cycle_timeline import (
     cycle_window_start,
     cycle_window_end,
     cycle_status,

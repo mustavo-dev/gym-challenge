@@ -1,7 +1,7 @@
 import unittest
 from datetime import date, datetime
 
-from gymchallenge.models import MembershipEvent
+from src.gymchallenge.models import MembershipEvent
 
 
 class TestMembershipEventModel(unittest.TestCase):

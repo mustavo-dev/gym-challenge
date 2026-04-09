@@ -1,6 +1,6 @@
 import unittest
 
-from gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_active_cycle, has_cycle_id
+from src.gymchallenge.cycle_ops import build_cycle_id, build_cycle_name, has_active_cycle, has_cycle_id
 
 
 class TestCycleOps(unittest.TestCase):

@@ -2,8 +2,8 @@ import os
 import tempfile
 import unittest
 
-from gymchallenge.storage_ops import append_row
-from gymchallenge.storage_json import load_list
+from src.gymchallenge.storage_ops import append_row
+from src.gymchallenge.storage_json import load_list
 
 
 class TestStorageOps(unittest.TestCase):

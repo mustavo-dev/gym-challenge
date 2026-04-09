@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from gymchallenge.scoring_time import is_within_checkin_window, score_day_for_timestamp
+from src.gymchallenge.scoring_time import is_within_checkin_window, score_day_for_timestamp
 
 
 BERLIN = ZoneInfo("Europe/Berlin")

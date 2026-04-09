@@ -2,8 +2,8 @@ import unittest
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-from gymchallenge.models import Membership, MembershipEvent
-from gymchallenge.membership_timeline import build_active_day_map
+from src.gymchallenge.models import Membership, MembershipEvent
+from src.gymchallenge.membership_timeline import build_active_day_map
 
 BERLIN = ZoneInfo("Europe/Berlin")
 

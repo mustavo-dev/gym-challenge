@@ -2,7 +2,7 @@ import unittest
 from datetime import date
 from zoneinfo import ZoneInfo
 
-from gymchallenge.demo_data_generator import (
+from src.gymchallenge.demo_data_generator import (
     generate_demo_participants,
     generate_demo_memberships,
     generate_demo_submissions,

@@ -1,6 +1,6 @@
 import unittest
 
-from gymchallenge.id_ops import new_submission_id, new_correction_id, new_membership_event_id
+from src.gymchallenge.id_ops import new_submission_id, new_correction_id, new_membership_event_id
 
 class TestIdOps(unittest.TestCase):
     def test_submission_id_prefix(self):
