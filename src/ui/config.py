@@ -12,3 +12,10 @@ def get_ui_timezone() -> ZoneInfo:
         tz_name = current_app.config.get("GYM_TIMEZONE", "UTC")
 
     return ZoneInfo(tz_name)
+
+def get_admin_actor_name() -> str:
+    """Return the configured admin actor name."""
+    if has_app_context():
+        return current_app.config.get("ADMIN_NAME", "Admin")
+
+    return "Admin"

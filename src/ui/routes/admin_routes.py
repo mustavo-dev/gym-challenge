@@ -9,7 +9,7 @@ from src.ui.services.submission_ui_service import get_submissions_for_list, filt
 from src.ui.services.correction_ui_service import get_corrections_for_list
 from src.ui.services.history_ui_service import get_history_for_list, filter_and_sort_history_for_view
 
-from src.ui.config import get_ui_timezone
+from src.ui.config import get_ui_timezone, get_admin_actor_name
 
 admin_bp = Blueprint(
     "admin",
@@ -233,7 +233,7 @@ def corrections_page():
             "new_points": new_points,
             "reason": reason,
             "created_at": datetime.now(ui_tz).isoformat(),
-            "admin": "jayme",
+            "admin": get_admin_actor_name(),
         }
 
         append_row(data_path("corrections.json"), row)
@@ -532,7 +532,7 @@ def system_page():
                     "participant_id": None,
                     "reason": "system reset via admin UI",
                     "created_at": timestamp,
-                    "actor": "jayme",
+                    "actor": get_admin_actor_name(),
                 }
             ],
         )
@@ -571,7 +571,7 @@ def system_page():
                     "participant_id": participant_id,
                     "reason": "archived via system page",
                     "created_at": datetime.now().astimezone().isoformat(),
-                    "actor": "jayme",
+                    "actor": get_admin_actor_name(),
                 },
             )
 
@@ -594,7 +594,7 @@ def system_page():
                     "participant_id": participant_id,
                     "reason": "restored via system page",
                     "created_at": datetime.now().astimezone().isoformat(),
-                    "actor": "jayme",
+                    "actor": get_admin_actor_name(),
                 },
             )
 

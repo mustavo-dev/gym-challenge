@@ -5,7 +5,7 @@ import csv
 
 from datetime import date, datetime
 from typing import Any
-from src.gymchallenge.runtime_config import get_runtime_timezone
+from src.gymchallenge.runtime_config import get_runtime_timezone, get_runtime_admin_name
 
 from gymchallenge.models import Submission, Correction, Membership, MembershipEvent, Cycle
 from gymchallenge.scoring_engine import compute_daily_scores, build_leaderboard, detect_auto_inactive, apply_auto_inactive, reactivate_member
@@ -27,7 +27,7 @@ from gymchallenge.demo_data_generator import generate_demo_participants, generat
 from gymchallenge.loaders import load_memberships, load_cycles, load_submissions, load_corrections, load_membership_events
 
 RUNTIME_TZ = get_runtime_timezone()
-
+RUNTIME_ADMIN_Name = get_runtime_admin_name()
 
 def parse_date(s: str) -> date:
     return date.fromisoformat(s)
@@ -191,7 +191,7 @@ def cmd_correction_add(args: argparse.Namespace) -> int:
         "new_points": points,
         "reason": reason,
         "created_at": datetime.now(RUNTIME_TZ).isoformat(),
-        "admin": "jayme",  # MVP default; later: --admin
+        "admin": RUNTIME_ADMIN_NAME()
     }
 
     append_row(data_path("corrections.json"), row)
@@ -230,7 +230,7 @@ def cmd_membership_reactivate(args: argparse.Namespace) -> int:
         effective_score_day=effective_day,
         reason=reason,
         created_at=datetime.now(RUNTIME_TZ),
-        actor="jayme",
+        actor=RUNTIME_ADMIN_NAME,
     )
 
     print(f"Reactivated membership: cycle={cycle_id} participant={participant_id} effective_day={effective_day.isoformat()}")
@@ -266,7 +266,7 @@ def cmd_membership_deactivate(args: argparse.Namespace) -> int:
         effective_score_day=effective_day,
         reason=reason,
         created_at=datetime.now(RUNTIME_TZ),
-        actor="jayme",
+        actor=RUNTIME_ADMIN_NAME,
     )
 
     print(f"Deactivated membership: cycle={cycle_id} participant={participant_id} effective_day={effective_day.isoformat()}")

@@ -23,6 +23,20 @@ class RuntimeConfigTests(unittest.TestCase):
 
         self.assertEqual(str(tz), "America/New_York")
 
+    def test_get_runtime_admin_name_uses_instance_config(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            instance_dir = os.path.join(tmpdir, "instance")
+            os.makedirs(instance_dir, exist_ok=True)
+
+            config_path = os.path.join(instance_dir, "config.py")
+            with open(config_path, "w", encoding="utf-8") as handle:
+                handle.write('ADMIN_NAME = "Jayme"\n')
+
+            from src.gymchallenge.runtime_config import get_runtime_admin_name
+
+            admin_name = get_runtime_admin_name(instance_dir)
+
+        self.assertEqual(admin_name, "Jayme")
 
 if __name__ == "__main__":
     unittest.main()

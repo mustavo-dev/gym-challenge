@@ -20,6 +20,17 @@ class UiConfigHelperTests(unittest.TestCase):
 
         self.assertEqual(str(tz), "America/New_York")
 
+    def test_get_admin_actor_name_uses_configured_admin_name(self) -> None:
+        app = create_app()
+        app.config["TESTING"] = True
+        app.config["ADMIN_NAME"] = "Jayme"
+
+        with app.app_context():
+            from src.ui.config import get_admin_actor_name
+
+            actor = get_admin_actor_name()
+
+        self.assertEqual(actor, "Jayme")
 
 if __name__ == "__main__":
     unittest.main()
