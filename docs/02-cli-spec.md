@@ -18,7 +18,7 @@ Displays detailed information about a specific cycle.
 
 Example:
 
-python3 src/main.py cycle show --cycle-id fall26
+python3 -m src.main cycle show --cycle-id fall26
 
 Output includes:
 

@@ -72,4 +72,4 @@ class MembershipEvent:
     effective_score_day: date
     reason: str
     created_at: datetime
-    actor: str  # system | jayme
+    actor: str  # system | configured admin actor
