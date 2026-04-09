@@ -78,12 +78,19 @@ class UiAppConfigTests(unittest.TestCase):
             self.assertEqual(app.config["GYM_TIMEZONE"], "Europe/Berlin")
 
     def test_create_app_sets_default_additional_config_values(self) -> None:
-        app = create_app()
-        app.config["TESTING"] = True
+        import os
+        import tempfile
 
-        self.assertEqual(app.config["GYM_NAME"], "Default Gym")
-        self.assertEqual(app.config["ADMIN_NAME"], "Admin")
-        self.assertEqual(app.config["GYM_TIMEZONE"], "UTC")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            instance_dir = os.path.join(tmpdir, "instance")
+            os.makedirs(instance_dir, exist_ok=True)
+
+            app = create_app(instance_path=instance_dir)
+            app.config["TESTING"] = True
+
+            self.assertEqual(app.config["GYM_NAME"], "Default Gym")
+            self.assertEqual(app.config["ADMIN_NAME"], "Admin")
+            self.assertEqual(app.config["GYM_TIMEZONE"], "UTC")
 
     def test_admin_dashboard_shows_configured_gym_name(self) -> None:
         app = create_app()
