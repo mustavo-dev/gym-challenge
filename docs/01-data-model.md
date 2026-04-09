@@ -1,153 +1,232 @@
-# Data Model (M0)
+# Data Model
 
-## Entities
+This document describes the current data model for gym-challenge.
 
-### Participant
+The current build still uses local JSON runtime storage.
+Customer-specific identity does **not** belong in these JSON runtime files.
+Customer-specific values belong in:
 
-* participant\_id (internal stable ID)
-* first\_name
-* last\_name
-* created\_at
-* active (global directory)
+instance/config.py
 
-### Cycle
+The runtime JSON files store challenge state, not deployment identity.
 
-- cycle_id
-- name
-- start_day
-- end_day
-- created_at
+Runtime Data Files
 
-### Derived Cycle Status
+The current runtime state is primarily stored in these files:
 
-Cycle status is not manually controlled in normal operation.
+participants.json
+memberships.json
+membership_events.json
+submissions.json
+corrections.json
+cycles.json
+system_events.json
 
-Instead, the system derives the effective status from:
-- current time
-- scoring window
-- cycle start_day
-- cycle end_day
+These files are used by both the CLI and Flask UI.
 
-Possible derived states:
-- planned
-- active
-- closed
+Participant Model
 
-#### Cycle Active Window
+Participant records represent people who may join one or more challenge cycles.
 
-A cycle's active window is defined as:
+Fields
+participant_id
+first_name
+last_name
+created_at
+active
+archived
+Notes
+participant_id is the stable identity used across memberships, submissions, corrections, and events
+archived controls whether the participant is excluded from normal operational views
+archived participants may still exist in historical records and system restore flows
 
-- opens: `start_day` at 20:00 Europe/Berlin
-- closes: `end_day + 1 day` at 12:00 Europe/Berlin
+Cycle Model
 
-This active window is used to:
-- determine cycle status
-- prevent overlapping active cycles
-- control when submissions are valid for a cycle
+Cycle records represent a challenge instance over a fixed date range.
 
-### Membership
+Fields
+cycle_id
+name
+start_day
+end_day
+created_at
+active
+Notes
+cycles define the valid score-day range for challenge scoring
+cycles must not overlap
+cycle identity is used by memberships, submissions, corrections, and reporting
 
-Links Participant ↔ Cycle
+Membership Model
 
-* cycle\_id
-* participant\_id
-* active_in_cycle = True
-* joined\_at
-* left\_at (optional)
-* auto_inactive: bool
-* inactive_reason: "manual"|"auto"
-* inactive_effective_score_day: date | None
+Membership records define whether a participant belongs to a specific cycle and what their current membership state is.
 
-#### Membership state transitions (MVP)
+Fields
+cycle_id
+participant_id
+active_in_cycle
+joined_at
+left_at
+inactive_reason
+inactive_effective_score_day
+Notes
+membership records are the base cycle-participation relationship
+active_in_cycle reflects current state
+inactive_effective_score_day is used to represent the score day when inactive status begins
+memberships can be further shaped by membership events
 
-Reactivation is represented by updating Membership fields (no separate event log in MVP):
+Membership Event Model
 
-- When a member becomes inactive (manual or auto):
-  - active_in_cycle = False
-  - inactive_reason = "manual" or "auto"
-  - inactive_effective_score_day = the first score day they are considered inactive
+Membership events represent state transitions that affect cycle participation over time.
 
-- When an admin reactivates a member:
-  - active_in_cycle = True
-  - inactive_reason remains as historical info (last known reason), or may be set to "manual" if preferred
-  - inactive_effective_score_day = None
-  - The reactivate command may specify an effective score day; if provided, the member is treated as active starting on that score day (otherwise defaults to next score day).
-- Auto-reactivation by submission (MVP):
-  - If a participant is inactive due to auto-inactive status and later makes a valid submission, the system treats them as active again starting on that same score day.
-  - The submission counts normally.
-  - Admin corrections do not trigger reactivation.
+Common fields
+event_id
+cycle_id
+participant_id
+event_type
+effective_score_day
+reason
+created_at
+actor
+Typical event types
+auto_inactive
+manual_inactive
+manual_reactivate
+auto_reactivate_submission
+Notes
+membership timeline reconstruction uses both membership rows and membership events
+same-day inactive/reactivate ordering matters for correct leaderboard behavior
+actor identity should be configuration-driven, not hardcoded
 
-### Submission (raw event)
+Submission Model
 
-* submission\_id
-* cycle\_id
-* participant\_id
-* submitted\_at (tz-aware)
-* points (-3..5)
-* source (manual|import|future:google)
+Submission records represent participant daily score entries.
 
-### Correction (admin overlay)
+Fields
+submission_id
+cycle_id
+participant_id
+submitted_at
+points
+source
+Notes
+submitted_at is interpreted using the configured gym timezone for score-day logic
+duplicate submissions for the same participant and score day are not allowed
+submission timestamps are used for admin visibility and auditability
+score day is derived from timestamp plus configured timezone, not stored directly in the raw submission record
 
-* correction\_id
-* cycle\_id
-* participant\_id
-* score\_day (YYYY-MM-DD label)
-* new\_points
-* reason required
-* created\_at
-* admin (e.g., Jayme)
+Correction Model
 
-## Membership Event History
+Correction records represent admin overrides for a participant’s score on a specific score day.
 
-Participants may move between active and inactive states multiple times during a cycle.
+Fields
+correction_id
+cycle_id
+participant_id
+score_day
+new_points
+reason
+created_at
+admin
+Notes
+corrections must only apply to valid members of the relevant cycle
+corrections override base scoring for the relevant score day
+admin identity should come from configured admin name
+correction creation timestamps should use configured runtime timezone behavior
 
-To preserve historical tracking, the system records **membership events**.
+System Event Model
 
-These events allow the system to determine:
+System event records represent important system-level actions.
 
-- when a participant became inactive
-- whether inactivity was automatic or manual
-- when a participant resumed participation
-- who triggered the change (system or admin)
+Common fields
+event_id
+event_type
+participant_id
+reason
+created_at
+actor
+Example event types
+dataset_reset
+participant_archived
+participant_restored
+Notes
+system events support operational auditability
+actor identity should be configuration-driven
+timestamps should follow configured runtime timezone behavior where applicable
 
-### MembershipEvent
+Derived Display/View Models
 
-Fields:
+The UI also produces derived display rows that are not stored directly as raw JSON records.
 
-- event_id
-- cycle_id
-- participant_id
-- event_type
-- effective_score_day
-- reason
-- created_at
-- actor
+Examples include:
 
-### Event Types
+admin submissions list rows
+corrections history rows
+membership display rows
+cycle display rows
+report export rows
 
-| Event Type | Description |
-|------------|-------------|
-| auto_inactive | Participant missed four consecutive days |
-| manual_inactive | Jayme manually deactivated participant |
-| manual_reactivate | Jayme manually reactivated participant |
-| auto_reactivate_submission | Participant became active again via valid submission |
+These view models may include derived fields such as:
 
-These events allow the system to reconstruct the **active/inactive timeline** of every participant.
+display_name
+formatted timestamps
+score_day
+visibility flags such as archived inclusion/exclusion
+sort keys such as raw timestamp fields
 
-## Derived Concepts
+These derived fields belong in services/view shaping, not in the raw persistent storage model unless explicitly promoted later.
 
-### Score Day
+Identity and Configuration Boundary
 
-A "score day" is determined from submitted\_at using the 20:00 boundary.
+Customer-specific identity is not part of the runtime JSON data model.
 
-* If submitted\_at time is 20:00–23:59 → score\_day = that date
-* If submitted\_at time is 00:00–11:59 → score\_day = previous date
-* If submitted\_at time is 12:00–19:59 → invalid submission
+The following values are configuration-driven and belong in instance/config.py instead:
 
-### Final Daily Score
+CHALLENGE_NAME
+GYM_NAME
+ADMIN_NAME
+GYM_TIMEZONE
+SECRET_KEY
 
-For each (participant, score\_day) in a given cycle:
+This separation matters because:
 
-1. Take earliest valid submission (if any)
-2. If no valid submission → missing penalty (-3)
-3. If an admin correction exists for that (participant, score\_day) → override to correction points
+challenge state should remain portable
+customer rollout should not require editing stored runtime data
+new client instances should be created through config, not code/data rewrites
+Relationship Summary
+Participant to Membership
+
+One participant may have memberships in multiple cycles.
+
+Cycle to Membership
+
+One cycle may contain many memberships.
+
+Membership to Membership Event
+
+One membership may accumulate many events over time.
+
+Participant/Cycle to Submission
+
+A participant may have multiple submissions within a cycle, but only one valid submission per score day.
+
+Participant/Cycle to Correction
+
+A participant may have corrections tied to score days within a cycle.
+
+Participant to System Event
+
+A participant may have system events such as archive/restore history.
+
+Runtime Behavior Implications
+
+The repaired build now depends on this data model being interpreted with:
+
+configured gym timezone
+config-driven admin identity
+archive-aware report behavior
+correct membership timeline reconstruction
+correction precedence over base scoring
+elapsed-day-only active-cycle reporting
+
+This means the JSON files alone are not the whole story.
+Correct behavior also depends on the current repaired domain logic and config layer.

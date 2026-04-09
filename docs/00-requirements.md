@@ -1,142 +1,249 @@
-# gym-challenge — Requirements (M0)
+# Requirements
 
-## Goal
+This document defines the current functional expectations for gym-challenge.
 
-Build a local-first Python automation system for a recurring gym nutrition/participation challenge.
-Must support 3-month cycles, cycle restarts, and concurrent cycles.
+The system is intended to support a recurring gym challenge using a Python CLI and Flask UI, with customer-specific identity and runtime values provided through configuration.
 
-## Time / Window
+---
 
-* Timezone: Europe/Berlin (authoritative)
-* Daily check-in window: 20:00 → 12:00 next day (Berlin)
-* Submissions outside window are invalid (ignored)
-* Missing submission for a score day = -3
+# Product Scope
 
-## Points
+gym-challenge must support:
 
-* Integer points range: -3 to 5
+- participant management
+- cycle management
+- membership management
+- participant daily score submission
+- admin corrections
+- leaderboard report generation
+- system archive/restore operations
+- history visibility for important admin/runtime events
 
-## Submission rules
+The system is currently validated locally first and prepared for later hosted deployment after QA.
 
-* One submission per participant per score day
-* If duplicates happen: keep earliest valid submission, ignore the rest
-* No retroactive submissions by participants
-* Admin corrections allowed (Jayme), not advertised
-* Correction reason is required
+---
 
-## Participation Status Tracking
+# Configuration Requirements
 
-Participants can transition between active and inactive states during a cycle.
+The system must support customer-specific configuration through:
 
-A participant becomes **automatically inactive** after **four consecutive days with no submission**.
+instance/config.py
 
-Inactive participants:
+The following values must be configurable without changing core code:
 
-- remain visible in leaderboards (unless explicitly excluded)
-- stop accumulating score changes until they become active again
+CHALLENGE_NAME
+GYM_NAME
+ADMIN_NAME
+GYM_TIMEZONE
+SECRET_KEY
 
-### Reactivation
+The system default timezone may be UTC, but real customer instances must be expected to set GYM_TIMEZONE explicitly.
 
-A participant can become active again in two ways:
+Customer rollout should be achieved through configuration changes, not customer-specific code edits.
 
-1. **Automatic Reactivation**
+Participant Requirements
+Participant records
 
-   - If an inactive participant submits a valid daily score, they are automatically reactivated.
-   - Reactivation is effective on the **same score day** as the valid submission.
-   - That day's score counts normally.
+The system must allow an admin to create participants.
 
-2. **Manual Reactivation**
+Each participant record must include:
 
-   - Jayme may manually reactivate a participant through the CLI.
-   - This requires specifying an effective score day and reason.
+participant ID
+first name
+last name
+created timestamp
+active/archive state
 
-### Important Rule
+Participant IDs must be generated consistently and avoid collisions.
 
-Administrative **corrections do not reactivate participants**.
+Archived participants
 
-Only a valid participant submission or manual admin action can reactivate someone.
+Archived participants must be excluded from normal operational flows.
 
-## Cycle rules
+Archived participants must not appear in:
 
-* A cycle has: cycle\_id, start\_score\_day, end\_score\_day, timezone, status
-* Cycles may run:
+normal leaderboard export paths
+normal correction eligibility paths
+normal active participant operational views
 
-  * sequentially (restart every ~3 months)
-  * concurrently (overlap)
+Archived participants may still be accessible through the system/archive restore path.
 
-* Participant membership is per-cycle
-* Cycle end includes final submission window until 12:00 next day
+Cycle Requirements
 
-## Cycle Lifecycle Rules
+The system must allow an admin to create challenge cycles.
 
-Cycles are date-driven and use the Berlin scoring window.
+Each cycle must include:
 
-Each cycle has:
-- cycle_id
-- name
-- start_day
-- end_day
-- created_at
+cycle ID
+cycle name
+start day
+end day
+created timestamp
+active state
 
-Cycle states are:
+Cycle IDs and names must be generated consistently.
 
-- planned
-- active
-- closed
+The system must reject overlapping cycle windows.
 
-These states are automatically derived from the current time and scoring window.
+Membership Requirements
 
-### Scoring Window
+The system must allow an admin to add participants to a cycle.
 
-- A score day opens at 20:00 Europe/Berlin
-- A score day closes at 12:00 Europe/Berlin on the next day
+Each membership must include:
 
-### State Rules
+cycle ID
+participant ID
+active-in-cycle state
+joined timestamp
+optional left timestamp
+optional inactive reason
+optional inactive effective score day
 
-A cycle is:
+The system must reject duplicate memberships for the same participant and cycle.
 
-- **planned** before `start_day` at 20:00 Berlin
-- **active** from `start_day` at 20:00 Berlin until `end_day + 1 day` at 12:00 Berlin
-- **closed** after `end_day + 1 day` at 12:00 Berlin
+Membership timeline behavior must support:
 
-### Business Rules
+joined state
+inactive state
+reactivated state
+left state
+Submission Requirements
+Participant submission page
 
-- Only one cycle may be active at a time
-- Future cycles may be created in advance
-- Future cycles remain planned until their start window opens
-- Active cycles automatically become closed after their final scoring window ends
-- Closed cycles remain available for historical reporting
-- No two cycles may have overlapping active windows
+The system must provide a participant-facing page for daily score submission.
 
-## Reporting (v1)
+The submit page must:
 
-* Console leaderboard summary
-* CSV export
-* Display format: Last, First
-* Internals store first + last separately
+list eligible participants for the active cycle
+reject invalid participant selection
+reject invalid score values
+reject duplicate submissions for the same participant and score day
+reject submissions outside the configured valid scoring window
+show a human-readable recorded timestamp after successful submission
+Submission timing
 
-## Reporting Policies
+Submission behavior must use the configured gym timezone.
 
-* Inactive handling models: historical vs exclude
+The score-day window must be enforced using configured runtime timezone behavior rather than hardcoded timezone assumptions.
 
-## Auto-inactive rule
+Submission visibility
 
-* 4 Consecutive missed score days → auto-inactive in that cycle
-* Auto-inactive is based on participant submissions, not corrections
-* Admin can reactivate an inactive member in a cycle with:
+The admin submissions view must provide:
 
-  * required reason
-  * optional effective score day (defaults to next score day if not provided)
+participant display name
+submission timestamp
+score day
+points
+source
+reliable sort behavior by timestamp and other supported filters
+Correction Requirements
 
-* If valid submission is added after participant becomes automatically inactive they will automatically be reactivated for doing the correct thing
+The system must allow an admin to create corrections.
 
-## Persistence (v1)
+Each correction must include:
 
-* JSON files stored locally in data/ (gitignored)
-* Upgrade path: SQLite later
+correction ID
+cycle ID
+participant ID
+score day
+new points
+reason
+created timestamp
+admin identity
 
-## Non-goals (for MVP)
+Corrections must be restricted to participants who are valid members of the relevant cycle.
 
-* WhatsApp API automation
-* Google Forms / Sheets integration
-* Web UI
+The corrections page must support filtering eligible participant choices by score day / matching cycle.
+
+Corrections must override base scoring for the relevant participant and score day.
+
+Latest correction should remain the highest-precedence correction where multiple corrections exist for the same score day path.
+
+Scoring Requirements
+
+The system must support daily score computation for cycle members.
+
+The scoring system must support:
+
+valid participation points
+missed-day penalty behavior
+correction override behavior
+score-day calculation based on configured timezone
+
+Scoring behavior must remain backend/domain authoritative.
+
+UI behavior must not silently introduce alternate scoring rules.
+
+Auto-Inactive and Reactivation Requirements
+
+The system must support auto-inactive behavior for members who miss the required threshold of days (4 consecutive days).
+
+The system must support reactivation after a valid submission when applicable.
+
+Membership timeline reconstruction and leaderboard behavior must correctly reflect:
+
+stored inactive state
+same-day inactive/reactivate ordering
+valid reactivation scoring behavior
+Report Requirements
+
+The system must allow leaderboard report export for a selected cycle.
+
+Leaderboard report generation must:
+
+use display name only in export
+exclude archived participants from normal export paths
+support configured runtime timezone behavior
+limit active-cycle scoring to elapsed days only
+support inactive inclusion behavior where explicitly requested
+
+Report output must align with operator expectations and remain readable.
+
+System / History Requirements
+
+The system must support system-level maintenance actions including:
+
+dataset reset
+participant archive
+participant restore
+
+The system must record important system/runtime actions with actor/admin identity.
+
+The system must provide history visibility for important admin/runtime events.
+
+Runtime Requirements
+CLI runtime
+
+The CLI must run using module invocation:
+
+python3 -m src.main --help
+UI runtime
+
+The Flask UI must be able to run locally using:
+
+python3 run_ui.py
+Secret key behavior
+
+The UI secret key must resolve in this order:
+
+environment variable
+instance config
+dev fallback
+
+Hosted deployment should prefer environment-provided secret values.
+
+Quality and Validation Requirements
+
+Before hosted deployment or client release, the system must pass:
+
+automated validation
+local smoke testing
+a full 7-day local QA cycle
+
+Meaningful repairs to correctness or runtime behavior must be followed by retesting before release.
+
+Carry-Forward Requirement
+
+Future reusable client products should be designed config-first from the beginning.
+
+If a project is likely to serve multiple customers, customer-specific identity and environment values must be placed in configuration up front instead of being retrofitted later.

@@ -12,7 +12,7 @@ source .venv/bin/activate
 cmd="${1:-run}"
 case "$cmd" in
   run)
-    python3 src/main.py
+    python3 -m src.main
     ;;
   test)
     PYTHONPATH=src python3 -m unittest discover -s tests -q

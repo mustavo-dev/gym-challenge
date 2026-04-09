@@ -20,3 +20,7 @@ Breakdown:
 Notes:
 Time expanded due to mid-development feature discovery.
 Future builds should include stronger pre-build planning.
+
+V1.1 Repair Time
+- 8 Apr: ~10 hours total with an hour of breaks, started repair work and transition to production ready
+- 9 Apr: Start: 0800
