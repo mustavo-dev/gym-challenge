@@ -23,4 +23,4 @@ Future builds should include stronger pre-build planning.
 
 V1.1 Repair Time
 - 8 Apr: ~10 hours total with an hour of breaks, started repair work and transition to production ready
-- 9 Apr: Start: 0800
+- 9 Apr: Start: 0800 End: 1200 4 hours minus 20 minute break, ready for beta test to start on laptop.
