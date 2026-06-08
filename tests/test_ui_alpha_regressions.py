@@ -3,7 +3,7 @@
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
-
+from datetime import date
 from src.ui.app import create_app
 
 
@@ -19,7 +19,7 @@ class UiAlphaRegressionTests(unittest.TestCase):
         """An invalid scoring-window submission must not be written to storage."""
         context = {
             "submit_enabled": True,
-            "active_cycle": SimpleNamespace(cycle_id="spring26"),
+            "active_cycle": SimpleNamespace(cycle_id="spring26", name="Spring 2026", start_day=date(2026, 3, 10), end_day=date(2026, 3, 30)),
             "participant_choices": [
                 {"participant_id": "walker-luke-01"},
             ],
@@ -334,7 +334,7 @@ class UiAlphaRegressionTests(unittest.TestCase):
 
         context = {
             "submit_enabled": True,
-            "active_cycle": SimpleNamespace(cycle_id="spring26", name="Spring 2026"),
+            "active_cycle": SimpleNamespace(cycle_id="spring26", name="Spring 2026", start_day=date(2026, 3, 10), end_day=date(2026, 3, 30)),
             "participant_choices": [
                 {"participant_id": "walker-luke-01", "display_name": "Luke Walker"},
             ],
@@ -445,7 +445,7 @@ class UiAlphaRegressionTests(unittest.TestCase):
 
         context = {
             "submit_enabled": True,
-            "active_cycle": SimpleNamespace(cycle_id="spring26", name="Spring 2026"),
+            "active_cycle": SimpleNamespace(cycle_id="spring26", name="Spring 2026", start_day=date(2026, 3, 10), end_day=date(2026, 3, 30)),
             "participant_choices": [
                 {"participant_id": "walker-luke-01", "display_name": "Luke Walker"},
             ],

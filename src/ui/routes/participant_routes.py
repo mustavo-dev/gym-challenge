@@ -3,6 +3,138 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from src.ui.services.submit_ui_service import get_submit_page_context
 from src.ui.config import get_ui_timezone
+from src.gymchallenge.scoring_engine import compute_daily_scores, detect_auto_inactive, apply_auto_inactive, reactivate_member
+from src.gymchallenge.reactivation_ops import detect_auto_reactivate
+from src.gymchallenge.system_event_ops import append_missing_auto_inactive_events, append_missing_auto_reactivate_events
+from src.gymchallenge.storage_json import load_list, save_list
+from src.gymchallenge.loaders import load_memberships, load_submissions, load_corrections
+
+def _run_auto_inactive_and_reactivate(active_cycle, ui_tz) -> None:
+    """
+    After a submission is saved, check and apply auto-inactive and
+    auto-reactivate state changes for the active cycle.
+    Corrections are intentionally excluded — only valid participant
+    submissions affect inactivity and reactivation status.
+    """
+    from datetime import datetime
+    from src.gymchallenge.data_paths import data_path
+
+    cycle_id = active_cycle.cycle_id
+    from_day = active_cycle.start_day
+    to_day = active_cycle.end_day
+
+    memberships_path = data_path("memberships.json")
+    events_path = data_path("membership_events.json")
+
+    membership_rows = load_list(memberships_path)
+    submissions = load_submissions(load_list(data_path("submissions.json")))
+    corrections = load_corrections(load_list(data_path("corrections.json")))
+    existing_event_rows = load_list(events_path)
+
+    memberships = load_memberships(membership_rows)
+    cycle_memberships = [m for m in memberships if m.cycle_id == cycle_id]
+    participant_ids = sorted({m.participant_id for m in cycle_memberships})
+
+    daily = compute_daily_scores(
+        participant_ids=participant_ids,
+        submissions=submissions,
+        tz=ui_tz,
+        cycle_start=from_day,
+        cycle_end=to_day,
+        missing_points=-3,
+        corrections=corrections,
+    )
+
+    # --- Auto-inactive pass ---
+    inactive_updates = detect_auto_inactive(
+        daily=daily,
+        cycle_start=from_day,
+        cycle_end=to_day,
+        streak_required=4,
+    )
+
+    if inactive_updates:
+        updated_cycle_memberships = apply_auto_inactive(cycle_memberships, inactive_updates)
+        updated_by_key = {(m.cycle_id, m.participant_id): m for m in updated_cycle_memberships}
+        new_membership_rows = []
+        for row in membership_rows:
+            key = (row["cycle_id"], row["participant_id"])
+            if key in updated_by_key:
+                m = updated_by_key[key]
+                new_membership_rows.append({
+                    "cycle_id": m.cycle_id,
+                    "participant_id": m.participant_id,
+                    "active_in_cycle": m.active_in_cycle,
+                    "joined_at": m.joined_at.isoformat(),
+                    "left_at": m.left_at.isoformat() if m.left_at else None,
+                    "inactive_reason": m.inactive_reason,
+                    "inactive_effective_score_day": (
+                        m.inactive_effective_score_day.isoformat()
+                        if m.inactive_effective_score_day else None
+                    ),
+                })
+            else:
+                new_membership_rows.append(row)
+        save_list(memberships_path, new_membership_rows)
+        append_missing_auto_inactive_events(
+            path=events_path,
+            existing_rows=existing_event_rows,
+            cycle_id=cycle_id,
+            updates=inactive_updates,
+            created_at=datetime.now(ui_tz),
+        )
+
+        # Reload after writing so reactivation sees the updated membership state
+        membership_rows = load_list(memberships_path)
+        memberships = load_memberships(membership_rows)
+        cycle_memberships = [m for m in memberships if m.cycle_id == cycle_id]
+        existing_event_rows = load_list(events_path)
+
+    # --- Auto-reactivate pass ---
+    reactivate_updates = detect_auto_reactivate(
+        memberships=cycle_memberships,
+        daily=daily,
+        from_day=from_day,
+        to_day=to_day,
+    )
+
+    if reactivate_updates:
+        updated_cycle_memberships = cycle_memberships
+        for participant_id, effective_day in reactivate_updates.items():
+            updated_cycle_memberships = reactivate_member(
+                memberships=updated_cycle_memberships,
+                participant_id=participant_id,
+                effective_day=effective_day,
+                reason="Auto-reactivated by valid submission",
+            )
+        updated_by_key = {(m.cycle_id, m.participant_id): m for m in updated_cycle_memberships}
+        new_membership_rows = []
+        for row in membership_rows:
+            key = (row["cycle_id"], row["participant_id"])
+            if key in updated_by_key:
+                m = updated_by_key[key]
+                new_membership_rows.append({
+                    "cycle_id": m.cycle_id,
+                    "participant_id": m.participant_id,
+                    "active_in_cycle": m.active_in_cycle,
+                    "joined_at": m.joined_at.isoformat(),
+                    "left_at": m.left_at.isoformat() if m.left_at else None,
+                    "inactive_reason": m.inactive_reason,
+                    "inactive_effective_score_day": (
+                        m.inactive_effective_score_day.isoformat()
+                        if m.inactive_effective_score_day else None
+                    ),
+                })
+            else:
+                new_membership_rows.append(row)
+        save_list(memberships_path, new_membership_rows)
+        append_missing_auto_reactivate_events(
+            path=events_path,
+            existing_rows=existing_event_rows,
+            cycle_id=cycle_id,
+            updates=reactivate_updates,
+            created_at=datetime.now(ui_tz),
+        )
 
 participant_bp = Blueprint(
     "participant",
@@ -85,6 +217,9 @@ def submit_page():
         }
 
         append_row(data_path("submissions.json"), row)
+
+        _run_auto_inactive_and_reactivate(active_cycle, ui_tz)
+
 
         recorded_display = now.strftime("%Y-%m-%d %H:%M %Z")
         flash(
