@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.0-dev] - 2026-06-08
+
+Bug: Participants never went inactive during UI operation, even after 4 consecutive missed days. The -3 penalty kept accumulating indefinitely instead of stopping after day 4.
+Root cause: detect_auto_inactive and detect_auto_reactivate only existed as manual CLI commands. The Flask UI never called them.
+Fix: Added _run_auto_inactive_and_reactivate() to src/ui/routes/participant_routes.py, triggered after every successful submission save. Runs the inactive pass first, reloads membership state, then runs the reactivation pass.
+Test fix: Three SimpleNamespace mocks in tests/test_ui_alpha_regressions.py updated to include start_day and end_day.
+Beta data backfill: Ran python3 -m src.main system apply-auto-inactive --cycle-id spring26 --from 2026-04-20 --to 2026-04-26 once to correct P5's stale membership record.
+Result: 95/97 tests passing. 2 pre-existing failures in test_demo_data_generator.py are unrelated and deferred.
+
 ## [1.1.0-dev] - 2026-04-09
 
 ### Status
