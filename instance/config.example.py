@@ -1,0 +1,5 @@
+CHALLENGE_NAME = "Example Challenge"
+GYM_NAME = "Example Gym"
+ADMIN_NAME = "Example Admin"
+GYM_TIMEZONE = "America/New_York"
+SECRET_KEY = "replace-with-a-long-random-secret"

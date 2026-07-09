@@ -12,3 +12,6 @@ exports/*.csv
 # allow placeholders
 !data/.keep
 !exports/.keep
+
+# Local instance configuration
+instance/config.py
