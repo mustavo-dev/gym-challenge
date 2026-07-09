@@ -29,7 +29,7 @@ instance/config.py
 Example template:
 CHALLENGE_NAME = "Spring Nutrition Challenge"
 GYM_NAME = "Example Gym"
-ADMIN_NAME = "Jayme"
+ADMIN_NAME = "Example Admin"
 GYM_TIMEZONE = "America/New_York"
 SECRET_KEY = "replace-with-a-long-random-secret"
 

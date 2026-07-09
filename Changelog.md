@@ -9,6 +9,21 @@ Test fix: Three SimpleNamespace mocks in tests/test_ui_alpha_regressions.py upda
 Beta data backfill: Ran python3 -m src.main system apply-auto-inactive --cycle-id spring26 --from 2026-04-20 --to 2026-04-26 once to correct P5's stale membership record.
 Result: 95/97 tests passing. 2 pre-existing failures in test_demo_data_generator.py are unrelated and deferred.
 
+### Acceptance trial outcome — 2026-06-28
+
+The seven-day v1.2 acceptance trial validated the repaired inactive/reactivation workflow under sustained use.
+
+The trial confirmed that participant reactivation could occur through normal UI submission flow, but it also exposed additional scoring and membership-state inconsistencies. By Day 6, membership state and leaderboard output were no longer aligned for multiple participants.
+
+Known issues from the trial include:
+
+- Membership state displayed inconsistently between admin views.
+- Multiple participants were shown inactive unexpectedly.
+- Leaderboard scoring became incorrect for several participants.
+- Participant status visibility remained insufficient for admin troubleshooting.
+
+The v1.2 build remains in development and is not ready for hosted deployment or release. Defects discovered during the acceptance trial remain pending investigation and repair.
+
 ## [1.1.0-dev] - 2026-04-09
 
 ### Status

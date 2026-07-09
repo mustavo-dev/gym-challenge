@@ -198,7 +198,7 @@ API / service layer
 ↓
 database-backed persistence
 
-The repaired build is being prepared first as a config-driven, production-ready local/hostable application, with hosted deployment expected after the next successful local QA cycle.
+The current build remains focused on local repair and validation. Hosted deployment is deferred until the defects discovered during the v1.2 acceptance trial are repaired and the system passes another successful validation cycle.
 
 Guardrails Going Forward
 

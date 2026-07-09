@@ -22,7 +22,7 @@ Use this template as the starting point:
 
 CHALLENGE_NAME = "Spring Nutrition Challenge"
 GYM_NAME = "Example Gym"
-ADMIN_NAME = "Jayme"
+ADMIN_NAME = "Example Admin"
 GYM_TIMEZONE = "America/New_York"
 SECRET_KEY = "replace-with-a-long-random-secret"
 
@@ -51,7 +51,7 @@ admin-facing report text
 persisted admin actor/admin metadata in runtime operations
 
 Example:
-ADMIN_NAME = "Jayme"
+ADMIN_NAME = "Example Admin"
 
 GYM_TIMEZONE
 Used for:
