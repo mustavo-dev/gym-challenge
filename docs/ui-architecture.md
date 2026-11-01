@@ -114,7 +114,7 @@ get_admin_actor_name()
 
 These helpers are used in Flask routes/services where current app config is available.
 
-5. Non-Flask Runtime Config Uses Shared Runtime Helpers
+## 5. Non-Flask Runtime Config Uses Shared Runtime Helpers
 
 Non-Flask code now includes:
 
@@ -130,7 +130,8 @@ Examples:
 CLI runtime
 demo data generation
 future non-Flask operational tooling
-Customer-Specific Configuration Rule
+
+## Customer-Specific Configuration Rule
 
 Customer-specific values must come from configuration, not from hardcoded route/service/template logic.
 
@@ -148,7 +149,7 @@ instance/config.py
 
 For hosted deployment, environment override is preferred where appropriate, especially for SECRET_KEY.
 
-Current UI Routes
+## Current UI Routes
 Admin routes
 /admin
 /admin/participants
@@ -162,7 +163,7 @@ Admin routes
 Participant routes
 /submit
 
-Current Repaired Behavior Highlights
+## Current Repaired Behavior Highlights
 The post-alpha repair cycle introduced important UI/runtime changes:
 
 invalid submission-window protection in the submit route
@@ -175,7 +176,7 @@ admin submissions now expose score day and better timestamp sorting
 runtime timezone behavior is configured, not hardcoded
 admin/runtime actor identity is now config-driven
 
-Storage Model
+## Storage Model
 The current build still uses local JSON runtime storage.
 
 Examples include:
@@ -189,7 +190,7 @@ system_events.json
 
 This remains a local-runtime data model for current QA and repair validation.
 
-Future Hosting Direction
+## Future Hosting Direction
 The current architecture is still compatible with a future migration path such as:
 
 Flask UI
@@ -200,7 +201,7 @@ database-backed persistence
 
 The current build remains focused on local repair and validation. Hosted deployment is deferred until the defects discovered during the v1.2 acceptance trial are repaired and the system passes another successful validation cycle.
 
-Guardrails Going Forward
+## Guardrails Going Forward
 
 For future changes:
 do not hardcode customer identity in route/template logic

@@ -192,6 +192,7 @@ This separation matters because:
 challenge state should remain portable
 customer rollout should not require editing stored runtime data
 new client instances should be created through config, not code/data rewrites
+
 Relationship Summary
 Participant to Membership
 

@@ -107,6 +107,7 @@ joined state
 inactive state
 reactivated state
 left state
+
 Submission Requirements
 Participant submission page
 
@@ -136,6 +137,7 @@ score day
 points
 source
 reliable sort behavior by timestamp and other supported filters
+
 Correction Requirements
 
 The system must allow an admin to create corrections.
@@ -185,6 +187,7 @@ Membership timeline reconstruction and leaderboard behavior must correctly refle
 stored inactive state
 same-day inactive/reactivate ordering
 valid reactivation scoring behavior
+
 Report Requirements
 
 The system must allow leaderboard report export for a selected cycle.
