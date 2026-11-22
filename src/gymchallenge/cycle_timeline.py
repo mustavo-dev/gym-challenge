@@ -8,14 +8,14 @@ from .models import Cycle
 
 def cycle_window_start(cycle: Cycle, tz: ZoneInfo) -> datetime:
     """
-    A cycle becomes active at 20:00 Berlin on start_day.
+    A cycle becomes active at 20:00 configured gym timezone on start_day.
     """
     return datetime.combine(cycle.start_day, time(20, 0), tzinfo=tz)
 
 
 def cycle_window_end(cycle: Cycle, tz: ZoneInfo) -> datetime:
     """
-    A cycle becomes closed at 12:00 Berlin on the day after end_day.
+    A cycle becomes closed at 12:00 configured gym timezone on the day after end_day.
     """
     end_plus_one = cycle.end_day + timedelta(days=1)
     return datetime.combine(end_plus_one, time(12, 0), tzinfo=tz)
