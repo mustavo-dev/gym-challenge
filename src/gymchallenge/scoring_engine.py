@@ -232,8 +232,7 @@ def build_leaderboard(
         pid = m.participant_id
 
         member_events = [
-            e
-            for e in membership_events
+            e for e in membership_events
             if e.cycle_id == m.cycle_id and e.participant_id == pid
         ]
 
