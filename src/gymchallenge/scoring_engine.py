@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 from typing import Dict, List
 from zoneinfo import ZoneInfo
 from dataclasses import dataclass
@@ -114,6 +114,8 @@ def detect_auto_inactive(
     daily: Dict[str, Dict[date, DailyScore]],
     cycle_start: date,
     cycle_end: date,
+    as_of: datetime,
+    tz: ZoneInfo,
     streak_required: int = 4,
 ) -> Dict[str, date]:
     """
@@ -122,8 +124,18 @@ def detect_auto_inactive(
     Inactivity becomes effective the next score day (the day after the streak completes).
     """
     updates: Dict[str, date] = {}
+    local_as_of = as_of.astimezone(tz)
+    local_date = local_as_of.date()
+    local_time = local_as_of.time()
 
-    score_days = _date_range(cycle_start, cycle_end)
+    if local_time < time(12, 0):
+        last_completed_day = local_date - timedelta(days=2)
+    else:
+        last_completed_day = local_date - timedelta(days=1)
+
+    evaluation_end = min(cycle_end, last_completed_day)
+
+    score_days = _date_range(cycle_start, evaluation_end)
 
     for pid, per_day in daily.items():
         streak = 0
