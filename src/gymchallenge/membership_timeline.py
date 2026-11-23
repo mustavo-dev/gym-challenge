@@ -92,7 +92,7 @@ def build_active_day_map(
 
         while (
             event_idx < len(relevant_events)
-            and relevant_events[event_idx].effective_score_day == d
+            and relevant_events[event_idx].effective_score_day <= d
         ):
             evt = relevant_events[event_idx]
             if evt.event_type in INACTIVE_EVENT_TYPES:

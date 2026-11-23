@@ -111,6 +111,123 @@ class TestMembershipTimeline(unittest.TestCase):
         self.assertEqual(active_map[date(2026, 3, 6)], True)
         self.assertEqual(active_map[date(2026, 3, 7)], True)
 
+    def test_events_before_requested_range_are_applied(self):
+        membership = Membership(
+            cycle_id="c1",
+            participant_id="p1",
+            active_in_cycle=True,
+            joined_at=datetime.fromisoformat("2026-03-01T20:00:00+01:00"),
+            left_at=None,
+            inactive_reason=None,
+            inactive_effective_score_day=None,
+        )
+
+        events = [
+            MembershipEvent(
+                event_id="evt1",
+                cycle_id="c1",
+                participant_id="p1",
+                event_type="auto_inactive",
+                effective_score_day=date(2026, 3, 5),
+                reason="4 consecutive missed days",
+                created_at=datetime.fromisoformat("2026-03-05T12:00:00+01:00"),
+                actor="system",
+            ),
+            MembershipEvent(
+                event_id="evt2",
+                cycle_id="c1",
+                participant_id="p1",
+                event_type="auto_reactivate_submission",
+                effective_score_day=date(2026, 3, 8),
+                reason="valid submission",
+                created_at=datetime.fromisoformat("2026-03-08T20:05:00+01:00"),
+                actor="system",
+            ),
+        ]
+
+        active_map = build_active_day_map(
+            membership=membership,
+            events=events,
+            from_day=date(2026, 3, 6),
+            to_day=date(2026, 3, 9),
+            tz=BERLIN,
+        )
+
+        self.assertEqual(active_map[date(2026, 3, 6)], False)
+        self.assertEqual(active_map[date(2026, 3, 7)], False)
+        self.assertEqual(active_map[date(2026, 3, 8)], True)
+        self.assertEqual(active_map[date(2026, 3, 9)], True)
+
+    def test_multiple_inactivity_reactivation_periods(self):
+        membership = Membership(
+            cycle_id="c1",
+            participant_id="p1",
+            active_in_cycle=True,
+            joined_at=datetime.fromisoformat("2026-03-01T20:00:00+01:00"),
+            left_at=None,
+            inactive_reason=None,
+            inactive_effective_score_day=None,
+        )
+
+        events = [
+            MembershipEvent(
+                event_id="evt1",
+                cycle_id="c1",
+                participant_id="p1",
+                event_type="auto_inactive",
+                effective_score_day=date(2026, 3, 5),
+                reason="4 consecutive missed days",
+                created_at=datetime.fromisoformat("2026-03-05T12:00:00+01:00"),
+                actor="system",
+            ),
+            MembershipEvent(
+                event_id="evt2",
+                cycle_id="c1",
+                participant_id="p1",
+                event_type="auto_reactivate_submission",
+                effective_score_day=date(2026, 3, 8),
+                reason="valid submission",
+                created_at=datetime.fromisoformat("2026-03-08T20:05:00+01:00"),
+                actor="system",
+            ),
+            MembershipEvent(
+                event_id="evt3",
+                cycle_id="c1",
+                participant_id="p1",
+                event_type="auto_inactive",
+                effective_score_day=date(2026, 3, 13),
+                reason="4 consecutive missed days",
+                created_at=datetime.fromisoformat("2026-03-13T12:00:00+01:00"),
+                actor="system",
+            ),
+            MembershipEvent(
+                event_id="evt4",
+                cycle_id="c1",
+                participant_id="p1",
+                event_type="auto_reactivate_submission",
+                effective_score_day=date(2026, 3, 16),
+                reason="valid submission",
+                created_at=datetime.fromisoformat("2026-03-16T20:05:00+01:00"),
+                actor="system",
+            ),
+        ]
+
+        active_map = build_active_day_map(
+            membership=membership,
+            events=events,
+            from_day=date(2026, 3, 6),
+            to_day=date(2026, 3, 17),
+            tz=BERLIN,
+        )
+
+        self.assertEqual(active_map[date(2026, 3, 6)], False)
+        self.assertEqual(active_map[date(2026, 3, 8)], True)
+        self.assertEqual(active_map[date(2026, 3, 12)], True)
+        self.assertEqual(active_map[date(2026, 3, 13)], False)
+        self.assertEqual(active_map[date(2026, 3, 15)], False)
+        self.assertEqual(active_map[date(2026, 3, 16)], True)
+        self.assertEqual(active_map[date(2026, 3, 17)], True)
+
     def test_left_at_ends_activity(self):
         membership = Membership(
             cycle_id="c1",
