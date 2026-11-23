@@ -151,7 +151,9 @@ def detect_auto_inactive(
             streak += 1
 
             if streak >= streak_required:
-                updates[pid] = d + timedelta(days=1)
+                effective_day = d + timedelta(days=1)
+                if effective_day <= cycle_end:
+                    updates[pid] = effective_day
                 break  # stop scanning this participant after first trigger
 
     return updates

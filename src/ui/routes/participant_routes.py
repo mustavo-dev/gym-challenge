@@ -23,6 +23,8 @@ def _run_auto_inactive_and_reactivate(active_cycle, ui_tz) -> None:
     from_day = active_cycle.start_day
     to_day = active_cycle.end_day
 
+    as_of = datetime.now(ui_tz)
+
     memberships_path = data_path("memberships.json")
     events_path = data_path("membership_events.json")
 
@@ -50,6 +52,8 @@ def _run_auto_inactive_and_reactivate(active_cycle, ui_tz) -> None:
         daily=daily,
         cycle_start=from_day,
         cycle_end=to_day,
+        as_of=as_of,
+        tz=ui_tz,
         streak_required=4,
     )
 

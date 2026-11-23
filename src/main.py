@@ -277,6 +277,8 @@ def cmd_system_apply_auto_inactive(args: argparse.Namespace) -> int:
     from_day = date.fromisoformat(args.from_day)
     to_day = date.fromisoformat(args.to_day)
 
+    as_of = datetime.now(RUNTIME_TZ)
+
     memberships_path = data_path("memberships.json")
     events_path = data_path("membership_events.json")
 
@@ -305,6 +307,8 @@ def cmd_system_apply_auto_inactive(args: argparse.Namespace) -> int:
         daily=daily,
         cycle_start=from_day,
         cycle_end=to_day,
+        as_of=as_of,
+        tz=RUNTIME_TZ,
         streak_required=4,
     )
 
